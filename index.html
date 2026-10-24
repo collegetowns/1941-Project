@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Are You Officially Old?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;500;700&family=IBM+Plex+Mono:wght@400;600&family=Stardos+Stencil:wght@700&display=swap">
+<style>
+/* Layout: a single-column field-inspection form. Stencil header, typed-form body, result card that swaps between a drill-sergeant poster and a short brush-off. */
+:root {
+  --paper: #ece6d2;
+  --card: #f6f1e0;
+  --ink: #23271c;
+  --muted: #5d6148;
+  --olive: #4a5230;
+  --red: #b3261e;
+  --mustard: #d9a21b;
+  --line: #b9b28f;
+  --poster-bg: #b3261e;
+  --poster-ray: #c8382d;
+  --poster-cream: #f3e8c4;
+  --poster-ink: #23271c;
+  --poster-coat: #4a5230;
+  --poster-skin: #d9a679;
+  --poster-brim: #6b5a30;
+  --font-display: "Stardos Stencil", "Impact", "Arial Black", sans-serif;
+  --font-body: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1b1e14; --card: #252a1a; --ink: #ece6d2; --muted: #a7a98a;
+    --olive: #8c9a5b; --red: #e0554a; --mustard: #e6b53a; --line: #4a5030;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1b1e14; --card: #252a1a; --ink: #ece6d2; --muted: #a7a98a;
+  --olive: #8c9a5b; --red: #e0554a; --mustard: #e6b53a; --line: #4a5030;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.4;
+  padding-block: 1.5rem 2.5rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 34rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+.mast { display: flex; flex-direction: column; gap: 0.35rem; border-bottom: 4px solid var(--ink); padding-bottom: 0.9rem; }
+.form-no { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-size: clamp(2rem, 9vw, 3rem); line-height: 1; margin: 0; text-transform: uppercase; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 34ch; }
+form { display: flex; flex-wrap: wrap; align-items: end; gap: 0.75rem; }
+.field { display: flex; flex-direction: column; gap: 0.3rem; flex: 1 1 12rem; min-width: 0; }
+label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+input[type="date"] {
+  font: 600 1.1rem var(--font-mono);
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: 0.6rem 0.7rem;
+  min-width: 0;
+  width: 100%;
+}
+button {
+  font: 700 1.25rem var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #f6f1e0;
+  background: var(--red);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+button:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+.err { font-family: var(--font-mono); font-size: 0.85rem; color: var(--red); margin: 0; min-height: 1.2em; }
+
+.timeline { background: var(--card); border: 2px solid var(--ink); padding: 0.6rem 0.8rem 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.tl-head { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.track-area { position: relative; height: 4.6rem; margin-inline: 0.5rem; }
+.track { position: absolute; left: 0; right: 0; top: 1.7rem; height: 8px; background: var(--line); }
+.zone-war { position: absolute; top: 1.7rem; height: 8px; background: var(--olive); }
+.zone-now { position: absolute; top: 1.7rem; height: 8px; background: var(--mustard); }
+.tick { position: absolute; width: 2px; background: var(--ink); top: 1.4rem; height: 1.3rem; }
+.tl-label { position: absolute; top: 2.85rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.64rem; line-height: 1.25; text-align: center; white-space: pre; }
+.tl-label.right { transform: translateX(-100%); text-align: right; }
+.tl-label.left { transform: none; text-align: left; }
+.you { position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; font-family: var(--font-display); font-size: 0.85rem; line-height: 1; color: var(--red); }
+.you::after { content: ""; width: 2px; height: 1.1rem; background: var(--red); }
+.you[hidden] { display: none !important; }
+.tl-note { margin: 0; font-size: 0.9rem; line-height: 1.3; }
+
+.result { display: flex; flex-direction: column; gap: 1rem; }
+.verdict { background: var(--card); border: 2px solid var(--ink); padding: 1.1rem 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.7rem; }
+.stamp { align-self: flex-start; font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); border: 3px solid var(--red); padding: 0.1rem 0.6rem; transform: rotate(-2.5deg); }
+.stamp.young { color: var(--olive); border-color: var(--olive); }
+.verdict h2 { font-family: var(--font-display); font-size: clamp(1.6rem, 7vw, 2.2rem); line-height: 1.05; margin: 0; text-transform: uppercase; text-wrap: balance; }
+.verdict p { margin: 0; }
+.math { font-family: var(--font-mono); font-size: 0.82rem; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 0.7rem; display: grid; gap: 0.2rem; }
+.math b { color: var(--ink); font-weight: 600; }
+.poster { width: 100%; max-width: 22rem; height: auto; border: 2px solid var(--ink); align-self: center; background: var(--poster-bg); }
+.poster-wrap { display: flex; flex-direction: column; gap: 0.4rem; }
+.poster-wrap figcaption { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); text-align: center; }
+figure { margin: 0; }
+.again { align-self: flex-start; }
+.byline { margin: 0; font-weight: 300; font-size: 0.9rem; letter-spacing: 0.1em; color: var(--muted); }
+.form-no a, .byline a, .sponsor a { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.form-no a:hover, .byline a:hover, .sponsor a:hover { color: var(--red); text-decoration-color: var(--red); }
+.form-no a:focus-visible, .byline a:focus-visible, .sponsor a:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+.sponsor { align-self: flex-end; text-align: right; margin: 0.5rem 0 0; font-weight: 500; font-size: 1rem; letter-spacing: 0.06em; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) {
+  .verdict { animation: slam 0.25s ease-out; }
+  @keyframes slam { from { transform: scale(1.04); opacity: 0.4; } to { transform: scale(1); opacity: 1; } }
+}
+</style>
+
+<main class="wrap">
+  <header class="mast">
+    <div class="form-no">Age inspection by <a href="https://collegetowns.org" target="_blank" rel="noopener">College Towns</a></div>
+    <h1>Are You Officially Old?</h1>
+    <p class="lede">Enter your date of birth. We measure whether you were born closer to the end of World War II or to today.</p>
+  </header>
+
+  <form id="f" novalidate>
+    <div class="field">
+      <label for="dob">Date of birth</label>
+      <input id="dob" type="date" min="1880-01-01" required>
+    </div>
+    <button type="submit">Report in</button>
+  </form>
+  <p class="err" id="err" role="alert"></p>
+
+  <section class="timeline" aria-label="Timeline from the end of World War II to today">
+    <div class="tl-head">Distance chart · World War II to Today</div>
+    <div class="track-area" id="tl">
+      <div class="track"></div>
+      <div class="zone-war" id="zw"></div>
+      <div class="zone-now" id="zn"></div>
+      <div class="tick" id="t-war"></div>
+      <div class="tick" id="t-mid"></div>
+      <div class="tick" id="t-now" style="width:3px"></div>
+      <div class="tl-label left" id="l-war"></div>
+      <div class="tl-label" id="l-mid"></div>
+      <div class="tl-label right" id="l-now"></div>
+      <div class="you" id="you" hidden><span>YOU</span></div>
+    </div>
+    <p class="tl-note" id="tl-note"></p>
+  </section>
+
+  <section class="result" id="result" aria-live="polite"></section>
+
+  <p class="sponsor">Part of the 1941 Project on <a href="https://collegetowns.org/" target="_blank" rel="noopener">CollegeTowns.org</a></p>
+</main>
+
+<script>
+(function () {
+  var WAR_END = Date.UTC(1945, 8, 2); // formal Japanese surrender, 2 September 1945
+  var DAY = 86400000;
+  var START = WAR_END; // the bar begins at the end of WWII
+
+  var QUIPS = [
+    "On your feet, you old maggot! The war was practically in your lifetime!",
+    "Drop and give me twenty, grandpa! Then give me twenty more for the hip!",
+    "You call that a birth year, you wrinkled old maggot? Stand up straight!",
+    "Pick up that cane and march, you antique! I've seen fossils with better posture!",
+    "Did you ration sugar, you old maggot? Because you look like you invented it!"
+  ];
+
+  function todayUTC() {
+    var d = new Date();
+    return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  function judge(birthMs, nowMs) {
+    var toWar = Math.abs(birthMs - WAR_END);
+    var toNow = nowMs - birthMs;
+    return {
+      closerToWar: toWar < toNow,
+      daysToWar: toWar / DAY,
+      daysToNow: toNow / DAY,
+      beforeWar: birthMs < WAR_END
+    };
+  }
+
+  function fmtDate(ms) {
+    return new Date(ms).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+  }
+  function yrs(days) { return (days / 365.25).toFixed(1); }
+
+  var now = todayUTC();
+  var mid = Math.round((WAR_END + now) / 2);
+  var range = now - START;
+  function pct(ms) { return ((ms - START) / range * 100); }
+
+  function place(id, ms) { document.getElementById(id).style.left = pct(ms) + "%"; }
+  place("t-war", WAR_END); place("t-mid", mid); place("t-now", now);
+  place("l-war", WAR_END); place("l-mid", mid);
+  document.getElementById("l-now").style.left = "100%";
+  var zw = document.getElementById("zw"), zn = document.getElementById("zn");
+  zw.style.left = "0%"; zw.style.width = pct(mid) + "%";
+  zn.style.left = pct(mid) + "%"; zn.style.width = (100 - pct(mid)) + "%";
+  document.getElementById("l-war").textContent = "End of WWII\n(1945)";
+  document.getElementById("l-mid").textContent = "Halfway " + new Date(mid).getUTCFullYear();
+  document.getElementById("l-now").textContent = "Today";
+  document.getElementById("tl-note").textContent =
+    "Born before " + fmtDate(mid) + "? You are closer to the war. Born after? You are closer to today.";
+
+  var INK = "#23271c", CREAM = "#f3e8c4", SKIN = "#d9a679", BRIM = "#6b5a30", RED = "#b3261e", GOLD = "#e0a91f", NAVY = "#1f3a5f", WOOD = "#7a4a24";
+  var PAL = {
+    red:     { bg: "#b3261e", ray: "#c8382d", coat: "#4a5230" },
+    navy:    { bg: "#1f3a5f", ray: "#2b4c7a", coat: "#6b7440" },
+    mustard: { bg: "#d9a21b", ray: "#e8b83a", coat: "#4a5230" },
+    olive:   { bg: "#4a5230", ray: "#5b6639", coat: "#2a2e20" },
+    char:    { bg: "#2b2f24", ray: "#3a3f30", coat: "#4a5230" }
+  };
+
+  function star(cx, cy, r) {
+    var pts = [];
+    for (var i = 0; i < 10; i++) {
+      var ang = -Math.PI / 2 + i * Math.PI / 5;
+      var rad = i % 2 ? r * 0.4 : r;
+      pts.push((cx + rad * Math.cos(ang)).toFixed(1) + "," + (cy + rad * Math.sin(ang)).toFixed(1));
+    }
+    return '<polygon points="' + pts.join(" ") + '"/>';
+  }
+
+  var BD = {
+    rays: function (p) {
+      var s = "";
+      for (var i = 0; i < 16; i++) {
+        s += '<path d="M150 190 L-60 -10 L-10 -80 Z" fill="' + p.ray + '" transform="rotate(' + (i * 22.5) + ' 150 190)"/>';
+      }
+      return s;
+    },
+    stripes: function (p) {
+      var s = "";
+      for (var i = -4; i < 10; i++) {
+        s += '<path d="M' + (i * 50) + ' 0 L' + (i * 50 + 25) + ' 0 L' + (i * 50 - 125) + ' 400 L' + (i * 50 - 150) + ' 400 Z" fill="' + p.ray + '"/>';
+      }
+      return s;
+    },
+    stars: function (p) {
+      var pos = [[40, 112], [260, 118], [62, 240], [246, 236], [150, 84], [30, 320], [272, 320]];
+      var s = '<g fill="' + p.ray + '">';
+      pos.forEach(function (q) { s += star(q[0], q[1], 17); });
+      return s + "</g>";
+    },
+    search: function () {
+      return '<path d="M20 400 L112 0 L196 0 Z" fill="' + CREAM + '" opacity="0.16"/>' +
+             '<path d="M290 400 L104 0 L188 0 Z" fill="' + CREAM + '" opacity="0.12"/>';
+    },
+    dots: function (p) {
+      return '<defs><pattern id="hd" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="3.4" fill="' + p.ray + '"/></pattern></defs>' +
+             '<rect width="300" height="400" fill="url(#hd)"/>';
+    },
+    checker: function (p) {
+      return '<defs><pattern id="ck" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="' + p.ray + '"/><rect x="30" y="30" width="30" height="30" fill="' + p.ray + '"/></pattern></defs>' +
+             '<rect width="300" height="400" fill="url(#ck)"/>';
+    },
+    bunting: function (p) {
+      var s = '<path d="M0 74 Q150 100 300 74" stroke="' + INK + '" stroke-width="3" fill="none"/>';
+      for (var i = 0; i < 8; i++) {
+        var x = i * 38 + 2;
+        var y = 74 + Math.sin((x + 19) / 300 * Math.PI) * 17;
+        s += '<path d="M' + x + ' ' + (y - 1).toFixed(1) + ' L' + (x + 34) + ' ' + (y - 1).toFixed(1) + ' L' + (x + 17) + ' ' + (y + 34).toFixed(1) + ' Z" fill="' + (i % 2 ? p.ray : CREAM) + '" stroke="' + INK + '" stroke-width="2"/>';
+      }
+      return s;
+    },
+    horizon: function (p) {
+      return '<circle cx="150" cy="300" r="130" fill="' + p.ray + '"/>' +
+             '<rect y="300" width="300" height="100" fill="#000" opacity="0.22"/>' +
+             '<path d="M0 300 H300 M0 316 H300 M0 336 H300" stroke="' + INK + '" stroke-width="2" opacity="0.5"/>';
+    }
+  };
+
+  function base(coat) {
+    return '<path d="M30 400 L52 305 Q150 262 248 305 L270 400 Z" fill="' + coat + '"/>' +
+           '<path d="M120 300 L150 340 L180 300 L172 262 L128 262 Z" fill="' + SKIN + '"/>' +
+           '<path d="M130 318 L150 400 L170 318 L150 336 Z" fill="' + CREAM + '" opacity="0.9"/>';
+  }
+
+  var MOUTH = {
+    shout: '<path d="M128 246 Q150 232 172 246 Q150 276 128 246 Z" fill="' + INK + '"/><rect x="138" y="244" width="24" height="5" fill="' + CREAM + '"/>',
+    flat: '<path d="M130 250 L170 250" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/>',
+    grit: '<rect x="128" y="242" width="44" height="14" rx="4" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="3"/><path d="M139 242 V256 M150 242 V256 M161 242 V256" stroke="' + INK + '" stroke-width="2"/>'
+  };
+
+  function head(mouth) {
+    return '<ellipse cx="150" cy="205" rx="44" ry="54" fill="' + SKIN + '"/>' +
+      '<path d="M108 168 Q150 152 192 168" stroke="' + INK + '" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+      '<path d="M122 200 L140 207" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/>' +
+      '<path d="M178 200 L160 207" stroke="' + INK + '" stroke-width="6" stroke-linecap="round"/>' +
+      '<circle cx="131" cy="212" r="4" fill="' + INK + '"/><circle cx="169" cy="212" r="4" fill="' + INK + '"/>' +
+      MOUTH[mouth] +
+      '<ellipse cx="150" cy="158" rx="82" ry="14" fill="' + BRIM + '"/>' +
+      '<path d="M104 156 Q106 108 150 98 Q194 108 196 156 Q150 168 104 156 Z" fill="' + BRIM + '"/>' +
+      '<path d="M104 150 Q150 164 196 150 L196 158 Q150 172 104 158 Z" fill="' + INK + '" opacity="0.55"/>';
+  }
+
+  var PROPS = {
+    point: function (c) {
+      return '<path d="M232 330 L246 262 L270 268 L262 336 Z" fill="' + c + '" stroke="' + INK + '" stroke-width="2"/>' +
+             '<path d="M252 262 L206 222 Q198 214 206 208 Q214 204 220 210 L268 252 Z" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>';
+    },
+    megaphone: function () {
+      return '<path d="M134 240 L58 210 L48 286 L134 258 Z" fill="' + GOLD + '" stroke="' + INK + '" stroke-width="4"/>' +
+             '<rect x="128" y="238" width="14" height="24" rx="4" fill="' + INK + '"/>' +
+             '<path d="M30 220 Q20 248 30 276 M16 210 Q2 248 16 290" stroke="' + CREAM + '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+             '<ellipse cx="186" cy="320" rx="16" ry="12" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>';
+    },
+    clip: function () {
+      return '<g transform="rotate(-7 220 305)">' +
+             '<rect x="172" y="268" width="92" height="76" fill="#8a6a3a" stroke="' + INK + '" stroke-width="3"/>' +
+             '<rect x="180" y="282" width="76" height="56" fill="' + CREAM + '"/>' +
+             '<rect x="200" y="262" width="36" height="14" fill="#b9b28f" stroke="' + INK + '" stroke-width="2"/>' +
+             '<path d="M188 296 L193 301 L201 291 M188 312 L193 317 L201 307 M188 328 L193 333 L201 323" stroke="' + RED + '" stroke-width="3" fill="none"/>' +
+             '<path d="M208 297 H248 M208 313 H248 M208 329 H248" stroke="' + INK + '" stroke-width="3"/>' +
+             '</g>' +
+             '<ellipse cx="174" cy="318" rx="12" ry="18" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>';
+    },
+    whistle: function () {
+      return '<path d="M142 250 Q96 296 124 332" stroke="' + RED + '" stroke-width="4" fill="none"/>' +
+             '<rect x="140" y="240" width="34" height="14" rx="6" fill="#c9c3a0" stroke="' + INK + '" stroke-width="3"/>' +
+             '<circle cx="180" cy="248" r="11" fill="#c9c3a0" stroke="' + INK + '" stroke-width="3"/>' +
+             '<path d="M204 232 L222 222 M206 248 L228 248 M204 264 L222 274" stroke="' + CREAM + '" stroke-width="4" stroke-linecap="round"/>';
+    },
+    salute: function (c) {
+      return '<path d="M236 336 L270 322 L228 214 L204 224 Z" fill="' + c + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<path d="M196 178 L234 170 L242 196 L206 210 Z" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="3"/>';
+    },
+    magnifier: function () {
+      return '<path d="M196 232 L252 306" stroke="#3b3320" stroke-width="12" stroke-linecap="round"/>' +
+             '<circle cx="172" cy="206" r="34" fill="' + CREAM + '" fill-opacity="0.35" stroke="#3b3320" stroke-width="8"/>' +
+             '<ellipse cx="172" cy="208" rx="16" ry="12" fill="#fff"/><circle cx="172" cy="208" r="7" fill="' + INK + '"/>' +
+             '<circle cx="248" cy="302" r="15" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>';
+    },
+    stopwatch: function () {
+      return '<circle cx="224" cy="304" r="32" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<rect x="216" y="262" width="16" height="8" fill="' + INK + '"/>' +
+             '<path d="M224 304 L224 282" stroke="' + RED + '" stroke-width="4" stroke-linecap="round"/>' +
+             '<path d="M224 304 L240 314" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>' +
+             '<path d="M224 276 V280 M224 328 V332 M196 304 H200 M248 304 H252" stroke="' + INK + '" stroke-width="3"/>' +
+             '<circle cx="224" cy="304" r="4" fill="' + INK + '"/>' +
+             '<ellipse cx="188" cy="322" rx="14" ry="11" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>';
+    },
+    arms: function () {
+      return '<g stroke="' + INK + '" stroke-width="3">' +
+             '<path d="M58 300 L240 318 L236 338 L54 320 Z" fill="#5e6840"/>' +
+             '<path d="M242 300 L60 318 L64 338 L246 320 Z" fill="#6f7a4c"/></g>' +
+             '<circle cx="240" cy="328" r="14" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>' +
+             '<circle cx="60" cy="328" r="14" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="2"/>';
+    }
+  };
+
+  function serg(fig, mouth) {
+    return function (p) { return base(p.coat) + head(mouth) + PROPS[fig](p.coat); };
+  }
+
+  function cane() {
+    return '<path d="M70 306 L215 122 Q232 98 214 84 Q196 74 186 96" stroke="#6b4a24" stroke-width="12" fill="none" stroke-linecap="round"/>';
+  }
+  var OBJ = {
+    canes: function () {
+      return cane() + '<g transform="translate(300 0) scale(-1 1)">' + cane() + '</g>' +
+             '<g fill="' + GOLD + '" stroke="' + INK + '" stroke-width="3">' + star(150, 214, 36) + '</g>';
+    },
+    hourglass: function () {
+      return '<rect x="84" y="98" width="132" height="14" fill="' + WOOD + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<rect x="84" y="298" width="132" height="14" fill="' + WOOD + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<path d="M100 112 L200 112 L160 205 L200 298 L100 298 L140 205 Z" fill="' + CREAM + '" fill-opacity="0.25" stroke="' + INK + '" stroke-width="6" stroke-linejoin="round"/>' +
+             '<path d="M126 112 L174 112 L158 138 L142 138 Z" fill="' + GOLD + '"/>' +
+             '<path d="M104 298 L196 298 L172 258 L128 258 Z" fill="' + GOLD + '"/>' +
+             '<path d="M150 140 V258" stroke="' + GOLD + '" stroke-width="3"/>';
+    },
+    calendar: function () {
+      var g = "";
+      for (var r = 0; r < 3; r++) for (var c = 0; c < 6; c++) {
+        g += '<rect x="' + (76 + c * 25) + '" y="' + (240 + r * 18) + '" width="19" height="12" fill="none" stroke="' + INK + '" stroke-width="1.5"/>';
+      }
+      return '<rect x="62" y="96" width="176" height="212" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<rect x="62" y="96" width="176" height="40" fill="' + RED + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<circle cx="100" cy="96" r="6" fill="' + INK + '"/><circle cx="150" cy="96" r="6" fill="' + INK + '"/><circle cx="200" cy="96" r="6" fill="' + INK + '"/>' +
+             '<text x="150" y="124" text-anchor="middle" style="font-family:var(--font-display)" font-size="22" fill="' + CREAM + '">SEPTEMBER</text>' +
+             '<text x="150" y="212" text-anchor="middle" style="font-family:var(--font-display)" font-size="66" fill="' + INK + '">1945</text>' + g +
+             '<g transform="rotate(-14 150 266)"><rect x="70" y="244" width="160" height="44" fill="none" stroke="' + RED + '" stroke-width="5"/>' +
+             '<text x="150" y="276" text-anchor="middle" style="font-family:var(--font-display)" font-size="32" fill="' + RED + '">EXPIRED</text></g>';
+    },
+    bomber: function () {
+      return '<g fill="' + CREAM + '" opacity="0.5"><ellipse cx="60" cy="110" rx="34" ry="12"/><ellipse cx="236" cy="268" rx="40" ry="13"/><ellipse cx="84" cy="284" rx="26" ry="9"/></g>' +
+             '<g fill="#14170f" stroke="' + INK + '" stroke-width="2">' +
+             '<path d="M222 186 L262 136 L274 136 L254 192 Z"/>' +
+             '<path d="M118 194 L158 244 L190 244 L160 194 Z"/>' +
+             '<ellipse cx="150" cy="190" rx="94" ry="18"/>' +
+             '<path d="M130 184 L170 134 L196 134 L176 184 Z"/></g>' +
+             '<ellipse cx="116" cy="180" rx="22" ry="9" fill="' + CREAM + '"/>' +
+             '<ellipse cx="54" cy="190" rx="5" ry="30" fill="' + CREAM + '" opacity="0.6"/>' +
+             '<path d="M236 214 H292 M246 228 H292 M256 242 H292" stroke="' + CREAM + '" stroke-width="3" stroke-linecap="round" opacity="0.7"/>';
+    },
+    radio: function () {
+      var grill = "";
+      for (var i = 1; i <= 4; i++) grill += '<circle cx="112" cy="214" r="' + (i * 10) + '" fill="none" stroke="#8a6a3a" stroke-width="2"/>';
+      return '<path d="M104 126 Q150 92 196 126 M122 142 Q150 120 178 142" stroke="' + CREAM + '" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+             '<rect x="52" y="150" width="196" height="150" rx="18" fill="' + WOOD + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<circle cx="112" cy="214" r="44" fill="#3b2a14" stroke="' + INK + '" stroke-width="3"/>' + grill +
+             '<rect x="170" y="172" width="64" height="36" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<path d="M180 178 V202 M196 178 V202 M212 178 V202" stroke="' + INK + '" stroke-width="1.5"/><path d="M188 204 L214 178" stroke="' + RED + '" stroke-width="3"/>' +
+             '<circle cx="190" cy="240" r="13" fill="' + GOLD + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<circle cx="222" cy="240" r="13" fill="' + GOLD + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<rect x="70" y="300" width="14" height="14" fill="' + INK + '"/><rect x="216" y="300" width="14" height="14" fill="' + INK + '"/>';
+    },
+    ration: function () {
+      var g = "";
+      for (var r = 0; r < 2; r++) for (var c = 0; c < 4; c++) {
+        g += '<rect x="' + (110 + c * 28) + '" y="' + (222 + r * 30) + '" width="24" height="26" fill="none" stroke="' + INK + '" stroke-width="1.5" stroke-dasharray="3 2"/>';
+      }
+      return '<g transform="rotate(-6 150 210)"><rect x="76" y="96" width="156" height="220" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<rect x="76" y="96" width="20" height="220" fill="' + RED + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<text x="168" y="148" text-anchor="middle" style="font-family:var(--font-display)" font-size="32" fill="' + INK + '" textLength="112" lengthAdjust="spacingAndGlyphs">RATION</text>' +
+             '<text x="168" y="186" text-anchor="middle" style="font-family:var(--font-display)" font-size="32" fill="' + INK + '" textLength="84" lengthAdjust="spacingAndGlyphs">BOOK</text>' + g +
+             '<path d="M112 226 L132 244 M132 226 L112 244" stroke="' + RED + '" stroke-width="4"/>' +
+             '<g fill="' + RED + '">' + star(206, 158, 10) + '</g></g>';
+    },
+    medal: function () {
+      return '<path d="M104 80 L146 190 L174 190 L132 80 Z" fill="' + RED + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<path d="M196 80 L154 190 L126 190 L168 80 Z" fill="' + NAVY + '" stroke="' + INK + '" stroke-width="3"/>' +
+             '<circle cx="150" cy="238" r="64" fill="' + GOLD + '" stroke="' + INK + '" stroke-width="5"/>' +
+             '<circle cx="150" cy="238" r="48" fill="none" stroke="' + INK + '" stroke-width="3"/>' +
+             '<g fill="' + CREAM + '" stroke="' + INK + '" stroke-width="3">' + star(150, 240, 38) + '</g>';
+    },
+    chair: function () {
+      return '<rect x="86" y="206" width="124" height="14" fill="' + GOLD + '" opacity="0.9"/>' +
+             '<g transform="translate(0 -22)" stroke="' + CREAM + '" stroke-width="9" stroke-linecap="round" fill="none">' +
+             '<path d="M112 110 L126 250 M144 110 L156 250 M176 110 L186 250"/>' +
+             '<path d="M104 112 L190 112"/>' +
+             '<path d="M118 250 L214 250"/>' +
+             '<path d="M176 200 L222 200 L226 250"/>' +
+             '<path d="M126 250 L124 330 M214 250 L222 330"/>' +
+             '<path d="M70 336 Q160 366 258 330"/></g>';
+    }
+  };
+
+  var SCENES = [
+    { pal: "red",     bd: "rays",    art: serg("point", "shout"),        top: "YOU THERE!",     bottom: "FALL IN, OLD MAGGOT!" },
+    { pal: "navy",    bd: "stripes", art: serg("point", "grit"),         top: "LISTEN UP!",     bottom: "YOU ARE OLD, MAGGOT!" },
+    { pal: "mustard", bd: "stripes", art: serg("megaphone", "flat"),     top: "ATTENTION!",     bottom: "OLD MAGGOT ON DECK!" },
+    { pal: "char",    bd: "search",  art: serg("megaphone", "flat"),     top: "ROLL CALL!",     bottom: "WAKE UP, GRANDPA!" },
+    { pal: "olive",   bd: "dots",    art: serg("clip", "grit"),          top: "INSPECTION",     bottom: "WRINKLES: CONFIRMED" },
+    { pal: "red",     bd: "checker", art: serg("clip", "flat"),          top: "FORM 45-OLD",    bottom: "AGE: ANTIQUE. PASS." },
+    { pal: "navy",    bd: "stars",   art: serg("whistle", "flat"),       top: "TWEET TWEET!",   bottom: "RETIREMENT STARTS NOW" },
+    { pal: "olive",   bd: "rays",    art: serg("salute", "grit"),        top: "AT EASE!",       bottom: "YOU EARNED THE CHAIR." },
+    { pal: "red",     bd: "bunting", art: serg("salute", "flat"),        top: "SALUTE!",        bottom: "FOR YOUR GRAY HAIR" },
+    { pal: "mustard", bd: "dots",    art: serg("magnifier", "grit"),     top: "SPOTTED!",       bottom: "ONE OLD MAGGOT" },
+    { pal: "char",    bd: "horizon", art: serg("stopwatch", "grit"),     top: "TIME CHECK!",    bottom: "YOU'RE WAY PAST DUE" },
+    { pal: "red",     bd: "stripes", art: serg("arms", "grit"),          top: "UNIMPRESSED!",   bottom: "1945 CALLED, MAGGOT" },
+    { pal: "navy",    bd: "rays",    art: OBJ.canes,                     top: "CANES UP!",      bottom: "OLD-TIMER BRIGADE" },
+    { pal: "olive",   bd: "stripes", art: OBJ.hourglass,                 top: "TIME'S UP!",     bottom: "YOUR SAND IS DOWN" },
+    { pal: "mustard", bd: "checker", art: OBJ.calendar,                  top: "CHECK DATE!",    bottom: "YOU ARE EXPIRED" },
+    { pal: "navy",    bd: "search",  art: OBJ.bomber,                    top: "INCOMING!",      bottom: "SOUNDS LIKE YOUR ERA" },
+    { pal: "red",     bd: "dots",    art: OBJ.radio,                     top: "NEWS FLASH!",    bottom: "YOU ARE OLD" },
+    { pal: "olive",   bd: "bunting", art: OBJ.ration,                    top: "RATION BOOK",    bottom: "ONE NAP PER DAY" },
+    { pal: "red",     bd: "stars",   art: OBJ.medal,                     top: "MEDAL OF AGE",   bottom: "FOR SURVIVING DECADES" },
+    { pal: "char",    bd: "horizon", art: OBJ.chair,                     top: "RESERVED",       bottom: "YOUR ROCKING CHAIR" }
+  ];
+
+  function buildScene(s) {
+    var p = PAL[s.pal];
+    var topLen = Math.min(272, s.top.length * 23);
+    var botLen = Math.min(256, s.bottom.length * 13.5);
+    return '<svg class="poster" viewBox="0 0 300 400" role="img" aria-label="Original wartime-style poster. ' + s.top + ' ' + s.bottom + '">' +
+      '<rect width="300" height="400" fill="' + p.bg + '"/>' +
+      BD[s.bd](p) + s.art(p) +
+      '<text x="150" y="58" text-anchor="middle" style="font-family:var(--font-display)" font-size="40" textLength="' + topLen + '" lengthAdjust="spacingAndGlyphs" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="5" stroke-linejoin="round" paint-order="stroke">' + s.top + '</text>' +
+      '<rect x="14" y="340" width="272" height="46" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="3"/>' +
+      '<text x="150" y="372" text-anchor="middle" style="font-family:var(--font-display)" font-size="24" textLength="' + botLen + '" lengthAdjust="spacingAndGlyphs" fill="' + INK + '">' + s.bottom + '</text>' +
+      '</svg>';
+  }
+
+  var BLUE = "#3f8fd2", PINK = "#e8829e", MINT = "#4cae8a", YEL = "#f0c53a", BEAR = "#a8703e", TAN = "#e0b886", WHITEY = "#fffaf0", BSKIN = "#f2c9a0", ORANGE = "#e8742a", HORSE = "#d79a55";
+  PAL.sky = { bg: "#3f8fd2", ray: "#5aa5e0", coat: "#2d6fa8" };
+  PAL.pink = { bg: "#e8829e", ray: "#f09ab2", coat: "#c25f7d" };
+  PAL.mint = { bg: "#4cae8a", ray: "#68c3a0", coat: "#2f8466" };
+  PAL.sun = { bg: "#f0c53a", ray: "#f7d760", coat: "#c9a020" };
+  PAL.lilac = { bg: "#8b78c9", ray: "#a090d8", coat: "#6a58a8" };
+
+  function sk(fill, w) { return ' fill="' + fill + '" stroke="' + INK + '" stroke-width="' + (w || 4) + '"'; }
+  function ln(d, color, w) { return '<path d="' + d + '" stroke="' + color + '" stroke-width="' + w + '" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function txt(x, y, size, fill, s) {
+    return '<text x="' + x + '" y="' + y + '" text-anchor="middle" style="font-family:var(--font-display)" font-size="' + size + '" fill="' + fill + '" stroke="' + INK + '" stroke-width="2" paint-order="stroke">' + s + '</text>';
+  }
+  function bow(x, y, c) {
+    return '<polygon points="' + x + ',' + y + ' ' + (x - 12) + ',' + (y - 8) + ' ' + (x - 12) + ',' + (y + 8) + '"' + sk(c, 2) + '/>' +
+           '<polygon points="' + x + ',' + y + ' ' + (x + 12) + ',' + (y - 8) + ' ' + (x + 12) + ',' + (y + 8) + '"' + sk(c, 2) + '/>' +
+           '<circle cx="' + x + '" cy="' + y + '" r="4"' + sk(c, 2) + '/>';
+  }
+  function note(x, y) {
+    return '<ellipse cx="' + x + '" cy="' + y + '" rx="10" ry="7" transform="rotate(-20 ' + x + ' ' + y + ')" fill="' + INK + '"/>' +
+           ln('M' + (x + 9) + ' ' + (y - 3) + ' V' + (y - 38), INK, 4) +
+           '<path d="M' + (x + 9) + ' ' + (y - 38) + ' q14 4 12 18 q-6 -10 -12 -8 Z" fill="' + INK + '"/>';
+  }
+
+  function babyFace(cx, cy, smile) {
+    var s = '';
+    s += '<circle cx="' + (cx - 54) + '" cy="' + (cy + 4) + '" r="11"' + sk(BSKIN, 3) + '/>';
+    s += '<circle cx="' + (cx + 54) + '" cy="' + (cy + 4) + '" r="11"' + sk(BSKIN, 3) + '/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="54"' + sk(BSKIN, 4) + '/>';
+    s += ln('M' + (cx - 8) + ' ' + (cy - 52) + ' Q' + (cx + 2) + ' ' + (cy - 82) + ' ' + (cx + 16) + ' ' + (cy - 58), INK, 5);
+    [-20, 20].forEach(function (d) {
+      s += '<ellipse cx="' + (cx + d) + '" cy="' + (cy - 2) + '" rx="7" ry="9" fill="' + INK + '"/>';
+      s += '<circle cx="' + (cx + d + 2) + '" cy="' + (cy - 6) + '" r="2.5" fill="#fff"/>';
+      s += '<circle cx="' + (cx + d * 1.65) + '" cy="' + (cy + 16) + '" r="9" fill="' + PINK + '" opacity="0.55"/>';
+    });
+    if (smile) s += ln('M' + (cx - 12) + ' ' + (cy + 20) + ' Q' + cx + ' ' + (cy + 34) + ' ' + (cx + 12) + ' ' + (cy + 20), INK, 4);
+    return s;
+  }
+
+  function y1() {
+    return '<path d="M52 400 Q62 262 150 250 Q238 262 248 400 Z"' + sk(WHITEY, 4) + '/>' +
+           babyFace(150, 200, false) +
+           ln('M150 252 m-11 0 a11 11 0 1 0 22 0 a11 11 0 1 0 -22 0', INK, 8) +
+           ln('M150 252 m-11 0 a11 11 0 1 0 22 0 a11 11 0 1 0 -22 0', BLUE, 4) +
+           '<ellipse cx="150" cy="236" rx="26" ry="13"' + sk(BLUE, 3) + '/>' +
+           '<circle cx="150" cy="236" r="5" fill="' + CREAM + '"/>';
+  }
+  function y2(p) {
+    return '<path d="M44 400 Q56 262 150 250 Q244 262 256 400 Z"' + sk(p.coat, 4) + '/>' +
+           '<path d="M126 258 L150 290 L174 258" fill="' + CREAM + '" stroke="' + INK + '" stroke-width="3"/>' +
+           '<g fill="' + GOLD + '" stroke="' + INK + '" stroke-width="2">' + star(98, 322, 14) + star(202, 322, 14) + '</g>' +
+           babyFace(150, 212, false) +
+           ln('M120 192 L140 200', INK, 6) + ln('M180 192 L160 200', INK, 6) +
+           '<ellipse cx="150" cy="246" rx="14" ry="11" fill="' + INK + '"/>' +
+           '<ellipse cx="150" cy="251" rx="8" ry="4" fill="' + RED + '"/>' +
+           '<ellipse cx="150" cy="165" rx="78" ry="13" fill="' + BRIM + '"/>' +
+           '<path d="M100 164 Q102 112 150 102 Q198 112 200 164 Q150 176 100 164 Z" fill="' + BRIM + '"/>' +
+           '<path d="M100 158 Q150 172 200 158 L200 164 Q150 178 100 164 Z" fill="' + INK + '" opacity="0.55"/>';
+  }
+  function y3() {
+    return '<g transform="rotate(-20 150 210)">' +
+           '<rect x="140" y="226" width="20" height="104" rx="10"' + sk(YEL, 4) + '/>' +
+           '<ellipse cx="150" cy="226" rx="26" ry="9"' + sk(YEL, 3) + '/>' +
+           '<circle cx="150" cy="160" r="62"' + sk(PINK, 5) + '/>' +
+           ln('M96 146 Q150 196 204 146', WHITEY, 7) +
+           '<circle cx="124" cy="116" r="7" fill="' + WHITEY + '"/><circle cx="172" cy="112" r="7" fill="' + YEL + '"/>' +
+           '<circle cx="190" cy="186" r="6" fill="' + YEL + '"/><circle cx="108" cy="184" r="6" fill="' + WHITEY + '"/>' +
+           '</g>';
+  }
+  function y4() {
+    return '<ellipse cx="150" cy="282" rx="68" ry="52"' + sk(BEAR, 4) + '/>' +
+           '<ellipse cx="150" cy="290" rx="40" ry="34" fill="' + TAN + '"/>' +
+           '<ellipse cx="84" cy="262" rx="18" ry="30" transform="rotate(30 84 262)"' + sk(BEAR, 4) + '/>' +
+           '<ellipse cx="216" cy="262" rx="18" ry="30" transform="rotate(-30 216 262)"' + sk(BEAR, 4) + '/>' +
+           '<ellipse cx="112" cy="326" rx="26" ry="14"' + sk(BEAR, 4) + '/><ellipse cx="188" cy="326" rx="26" ry="14"' + sk(BEAR, 4) + '/>' +
+           '<circle cx="106" cy="126" r="20"' + sk(BEAR, 4) + '/><circle cx="194" cy="126" r="20"' + sk(BEAR, 4) + '/>' +
+           '<circle cx="106" cy="128" r="10" fill="' + TAN + '"/><circle cx="194" cy="128" r="10" fill="' + TAN + '"/>' +
+           '<circle cx="150" cy="170" r="56"' + sk(BEAR, 4) + '/>' +
+           '<ellipse cx="150" cy="190" rx="26" ry="20"' + sk(TAN, 3) + '/>' +
+           '<ellipse cx="150" cy="180" rx="9" ry="6" fill="' + INK + '"/>' +
+           ln('M150 186 L150 194 M140 198 Q150 206 160 198', INK, 3) +
+           '<circle cx="128" cy="158" r="6" fill="' + INK + '"/><circle cx="172" cy="158" r="6" fill="' + INK + '"/>' +
+           '<circle cx="130" cy="156" r="2" fill="#fff"/><circle cx="174" cy="156" r="2" fill="#fff"/>' +
+           '<polygon points="150,236 126,224 126,248"' + sk(RED, 3) + '/><polygon points="150,236 174,224 174,248"' + sk(RED, 3) + '/>' +
+           '<circle cx="150" cy="236" r="6"' + sk(RED, 3) + '/>';
+  }
+  function y5() {
+    return '<path d="M132 150 Q132 104 150 94 Q168 104 168 150 Z"' + sk("#f2c27a", 3) + '/>' +
+           '<rect x="110" y="170" width="80" height="150" rx="20"' + sk("#cfe9f7", 5) + '/>' +
+           '<rect x="114" y="214" width="72" height="102" rx="14" fill="' + WHITEY + '"/>' +
+           ln('M114 232 H132 M114 252 H128 M114 272 H132 M114 292 H128', BLUE, 3) +
+           '<path d="M150 296 C128 278 132 260 150 270 C168 260 172 278 150 296 Z"' + sk(PINK, 3) + '/>' +
+           '<rect x="102" y="148" width="96" height="26" rx="8"' + sk(PINK, 4) + '/>';
+  }
+  function y6() {
+    return '<rect x="54" y="244" width="92" height="90"' + sk(RED, 4) + '/>' +
+           '<rect x="154" y="244" width="92" height="90"' + sk(MINT, 4) + '/>' +
+           txt(100, 312, 62, WHITEY, 'A') + txt(200, 312, 62, WHITEY, 'B') +
+           '<g transform="rotate(-6 150 197)"><rect x="104" y="152" width="92" height="90"' + sk(YEL, 4) + '/>' + txt(150, 220, 62, WHITEY, 'C') + '</g>';
+  }
+  function y7() {
+    return '<path d="M66 232 L40 206 L90 218 Z"' + sk(YEL, 4) + '/>' +
+           '<ellipse cx="140" cy="262" rx="84" ry="56"' + sk(YEL, 5) + '/>' +
+           '<path d="M94 256 Q128 304 178 266 Q150 238 94 256 Z"' + sk("#e3b21a", 3) + '/>' +
+           '<circle cx="190" cy="176" r="46"' + sk(YEL, 5) + '/>' +
+           '<path d="M228 176 Q272 170 266 194 Q244 200 228 194 Z"' + sk(ORANGE, 4) + '/>' +
+           '<circle cx="202" cy="164" r="6" fill="' + INK + '"/><circle cx="204" cy="162" r="2" fill="#fff"/>' +
+           ln('M24 326 Q54 308 84 326 T144 326 T204 326 T264 326', CREAM, 5) +
+           '<circle cx="58" cy="292" r="8" fill="none" stroke="' + CREAM + '" stroke-width="3"/><circle cx="248" cy="302" r="6" fill="none" stroke="' + CREAM + '" stroke-width="3"/>';
+  }
+  function balloon(cx, cy, rx, ry, c) {
+    return '<path d="M' + cx + ' ' + (cy + ry) + ' L' + (cx - 7) + ' ' + (cy + ry + 12) + ' L' + (cx + 7) + ' ' + (cy + ry + 12) + ' Z"' + sk(c, 3) + '/>' +
+           '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '"' + sk(c, 4) + '/>' +
+           '<ellipse cx="' + (cx - rx * 0.4) + '" cy="' + (cy - ry * 0.4) + '" rx="' + (rx * 0.16) + '" ry="' + (ry * 0.28) + '" fill="#fff" opacity="0.55" transform="rotate(25 ' + (cx - rx * 0.4) + ' ' + (cy - ry * 0.4) + ')"/>';
+  }
+  function y8() {
+    return ln('M96 238 Q120 290 150 326', INK, 3) + ln('M204 238 Q180 290 150 326', INK, 3) + ln('M150 202 L150 326', INK, 3) +
+           balloon(150, 138, 42, 52, BLUE) + balloon(96, 176, 40, 50, RED) + balloon(204, 176, 40, 50, YEL) + bow(150, 326, PINK);
+  }
+  function leg(x1, y1, x2, y2) { return ln('M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2, INK, 18) + ln('M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2, HORSE, 11); }
+  function y9() {
+    return ln('M44 312 Q150 352 256 312', WOOD, 12) +
+           leg(106, 262, 100, 322) + leg(128, 268, 124, 326) + leg(176, 268, 184, 328) + leg(196, 262, 200, 326) +
+           ln('M82 232 Q50 246 58 292', RED, 10) +
+           '<ellipse cx="150" cy="240" rx="70" ry="34"' + sk(HORSE, 4) + '/>' +
+           '<path d="M184 222 L204 154 L238 164 L222 246 Z"' + sk(HORSE, 4) + '/>' +
+           '<ellipse cx="240" cy="150" rx="36" ry="20" transform="rotate(25 240 150)"' + sk(HORSE, 4) + '/>' +
+           '<path d="M222 134 L226 112 L240 130 Z"' + sk(HORSE, 3) + '/>' +
+           '<circle cx="248" cy="146" r="4" fill="' + INK + '"/>' +
+           ln('M204 154 Q192 190 184 224', RED, 10) +
+           '<rect x="126" y="208" width="48" height="18" rx="8"' + sk(RED, 3) + '/>';
+  }
+  function y10() {
+    return ln('M150 82 V104', WHITEY, 5) + ln('M50 104 H250', WHITEY, 7) +
+           ln('M84 104 V152', WHITEY, 3) + ln('M150 104 V204', WHITEY, 3) + ln('M216 104 V170', WHITEY, 3) +
+           '<g' + sk(YEL, 3) + '>' + star(84, 184, 32) + '</g>' +
+           '<path d="M160 204 A38 38 0 1 0 190 252 A30 30 0 1 1 160 204 Z"' + sk(YEL, 3) + '/>' +
+           '<g' + sk(WHITEY, 3) + '><circle cx="200" cy="196" r="16"/><circle cx="222" cy="188" r="20"/><circle cx="244" cy="198" r="14"/></g>';
+  }
+  function y11() {
+    var s = '<rect x="16" y="324" width="268" height="8" fill="' + INK + '"/>';
+    s += '<circle cx="82" cy="176" r="13"' + sk(CREAM, 3) + '/><circle cx="66" cy="148" r="17"' + sk(CREAM, 3) + '/><circle cx="94" cy="118" r="21"' + sk(CREAM, 3) + '/>';
+    s += '<path d="M62 226 L66 192 L90 192 L94 226 Z" fill="' + INK + '"/><rect x="58" y="184" width="40" height="10" rx="4" fill="' + INK + '"/>';
+    s += '<rect x="44" y="224" width="124" height="64" rx="12"' + sk(RED, 4) + '/>' + ln('M100 226 V286', YEL, 6);
+    s += '<rect x="136" y="190" width="52" height="98" rx="6"' + sk(BLUE, 4) + '/><rect x="130" y="182" width="64" height="12" rx="4" fill="' + INK + '"/>';
+    s += '<rect x="146" y="204" width="32" height="28" rx="4"' + sk(CREAM, 3) + '/>';
+    s += ln('M188 280 H204', INK, 5) + '<rect x="204" y="232" width="72" height="56" rx="8"' + sk(MINT, 4) + '/>';
+    [68, 118, 166, 222, 262].forEach(function (x) { s += '<circle cx="' + x + '" cy="304" r="19"' + sk(YEL, 4) + '/><circle cx="' + x + '" cy="304" r="5" fill="' + INK + '"/>'; });
+    return s;
+  }
+  function y12() {
+    return '<polygon points="150,92 86,170 150,170"' + sk(YEL, 3) + '/><polygon points="150,92 214,170 150,170"' + sk(RED, 3) + '/>' +
+           '<polygon points="86,170 150,170 150,262"' + sk(RED, 3) + '/><polygon points="214,170 150,170 150,262"' + sk(YEL, 3) + '/>' +
+           '<polygon points="150,92 214,170 150,262 86,170" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
+           ln('M150 262 Q116 280 150 298 T150 334', INK, 3) + bow(141, 281, PINK) + bow(158, 306, MINT) + bow(147, 326, YEL);
+  }
+  function y13() {
+    return ln('M104 196 Q58 200 62 250 Q66 280 108 280', PINK, 12) + ln('M196 196 Q242 200 238 250 Q234 280 192 280', PINK, 12) +
+           '<path d="M104 168 L196 168 L186 320 L114 320 Z"' + sk(BLUE, 5) + '/>' +
+           '<g' + sk(YEL, 3) + '>' + star(150, 244, 30) + '</g>' +
+           '<path d="M130 150 L136 118 L164 118 L170 150 Z"' + sk(PINK, 4) + '/>' +
+           '<rect x="98" y="148" width="104" height="26" rx="8"' + sk(PINK, 4) + '/>' +
+           '<ellipse cx="150" cy="118" rx="14" ry="4" fill="' + INK + '"/>';
+  }
+  function y14() {
+    return '<ellipse cx="122" cy="132" rx="17" ry="50" transform="rotate(-10 122 132)"' + sk(WHITEY, 4) + '/>' +
+           '<ellipse cx="178" cy="132" rx="17" ry="50" transform="rotate(10 178 132)"' + sk(WHITEY, 4) + '/>' +
+           '<ellipse cx="122" cy="136" rx="8" ry="38" transform="rotate(-10 122 136)" fill="' + PINK + '"/>' +
+           '<ellipse cx="178" cy="136" rx="8" ry="38" transform="rotate(10 178 136)" fill="' + PINK + '"/>' +
+           '<ellipse cx="150" cy="306" rx="50" ry="34"' + sk(WHITEY, 4) + '/>' +
+           '<circle cx="150" cy="214" r="48"' + sk(WHITEY, 4) + '/>' +
+           '<circle cx="132" cy="208" r="5" fill="' + INK + '"/><circle cx="168" cy="208" r="5" fill="' + INK + '"/>' +
+           '<circle cx="122" cy="226" r="8" fill="' + PINK + '" opacity="0.5"/><circle cx="178" cy="226" r="8" fill="' + PINK + '" opacity="0.5"/>' +
+           '<polygon points="144,220 156,220 150,228"' + sk(PINK, 2) + '/>' +
+           ln('M150 228 V234 M141 238 Q150 244 150 234 Q150 244 159 238', INK, 3) +
+           ln('M100 224 L122 228 M100 236 L122 234 M200 224 L178 228 M200 236 L178 234', INK, 2) +
+           '<polygon points="150,262 128,252 128,272"' + sk(BLUE, 3) + '/><polygon points="150,262 172,252 172,272"' + sk(BLUE, 3) + '/><circle cx="150" cy="262" r="5"' + sk(BLUE, 3) + '/>';
+  }
+  function shoe(dx, dy, c) {
+    return '<g transform="translate(' + dx + ' ' + dy + ')">' +
+           '<path d="M0 74 Q0 26 30 18 L50 18 Q54 42 80 48 Q98 52 98 74 Q98 90 80 90 L16 90 Q0 90 0 74 Z"' + sk(c, 4) + '/>' +
+           ln('M4 80 H94', INK, 3) +
+           '<rect x="24" y="0" width="32" height="22" rx="6"' + sk(WHITEY, 3) + '/>' +
+           ln('M30 56 Q52 66 76 56', WHITEY, 6) +
+           '<circle cx="54" cy="62" r="5"' + sk(YEL, 2) + '/></g>';
+  }
+  function y15() { return shoe(46, 200, PINK) + shoe(150, 156, BLUE); }
+  function y16() {
+    var b = '', t = '', i;
+    for (i = 0; i < 8; i++) b += ' q10 18 20 0';
+    for (i = 0; i < 5; i++) t += ' q10 16 20 0';
+    return '<ellipse cx="150" cy="326" rx="104" ry="12"' + sk(WHITEY, 3) + '/>' +
+           '<rect x="70" y="254" width="160" height="70" rx="10"' + sk(PINK, 4) + '/>' +
+           '<rect x="71" y="256" width="158" height="9" fill="' + WHITEY + '"/>' +
+           '<path d="M70 264' + b + '"' + sk(WHITEY, 3) + '/>' +
+           '<rect x="100" y="196" width="100" height="58" rx="10"' + sk(YEL, 4) + '/>' +
+           '<rect x="101" y="198" width="98" height="9" fill="' + WHITEY + '"/>' +
+           '<path d="M100 206' + t + '"' + sk(WHITEY, 3) + '/>' +
+           ln('M92 304 l6 -4 M130 296 l6 4 M176 306 l6 -4 M208 296 l6 4 M112 314 l6 -3', BLUE, 4) +
+           '<rect x="144" y="150" width="12" height="46"' + sk(BLUE, 3) + '/>' +
+           ln('M144 164 l12 -4 M144 176 l12 -4 M144 188 l12 -4', WHITEY, 3) +
+           '<path d="M150 122 Q136 144 150 156 Q164 144 150 122 Z"' + sk("#f6a21c", 3) + '/>' +
+           '<path d="M150 134 Q144 144 150 150 Q156 144 150 134 Z" fill="' + YEL + '"/>';
+  }
+  function y17() {
+    var s = '<rect x="94" y="98" width="112" height="226" rx="20"' + sk("#1b1f2a", 5) + '/>' +
+            '<rect x="102" y="114" width="96" height="194" rx="8" fill="#bfe3f5"/>' +
+            '<rect x="136" y="102" width="28" height="6" rx="3" fill="#000"/>' +
+            '<rect x="122" y="122" width="56" height="10" rx="5" fill="' + INK + '" opacity="0.6"/>';
+    var cols = [RED, YEL, MINT, PINK, BLUE, YEL, MINT, RED, BLUE, PINK, RED, YEL], r, c;
+    for (r = 0; r < 4; r++) for (c = 0; c < 3; c++) {
+      s += '<rect x="' + (108 + c * 30) + '" y="' + (150 + r * 34) + '" width="24" height="24" rx="7" fill="' + cols[r * 3 + c] + '"/>';
+    }
+    s += '<rect x="106" y="288" width="88" height="14" rx="7" fill="' + WHITEY + '"/>';
+    s += '<circle cx="202" cy="104" r="16"' + sk(RED, 3) + '/><text x="202" y="110" text-anchor="middle" style="font-family:var(--font-display)" font-size="16" fill="' + WHITEY + '">99</text>';
+    return s;
+  }
+  function y18() {
+    return ln('M20 190 H70 M30 208 H84 M16 226 H60', WHITEY, 5) +
+           '<g transform="rotate(-14 150 250)">' +
+           '<rect x="86" y="256" width="20" height="10"' + ' fill="' + INK + '"/><rect x="194" y="256" width="20" height="10" fill="' + INK + '"/>' +
+           '<circle cx="96" cy="272" r="16"' + sk(RED, 4) + '/><circle cx="204" cy="272" r="16"' + sk(RED, 4) + '/>' +
+           '<rect x="44" y="232" width="212" height="24" rx="12"' + sk(BLUE, 4) + '/>' +
+           '<path d="M70 244 H230" stroke="' + WHITEY + '" stroke-width="4" stroke-dasharray="10 8" fill="none"/></g>' +
+           '<g' + sk(GOLD, 3) + '>' + star(236, 164, 18) + '</g>';
+  }
+  function y19() {
+    return ln('M78 252 Q78 108 150 108 Q222 108 222 252', INK, 18) + ln('M78 252 Q78 108 150 108 Q222 108 222 252', YEL, 10) +
+           '<rect x="56" y="222" width="50" height="88" rx="22"' + sk(BLUE, 5) + '/><rect x="194" y="222" width="50" height="88" rx="22"' + sk(BLUE, 5) + '/>' +
+           '<circle cx="81" cy="266" r="12" fill="' + WHITEY + '" opacity="0.5"/><circle cx="219" cy="266" r="12" fill="' + WHITEY + '" opacity="0.5"/>' +
+           note(126, 280) + note(172, 246);
+  }
+  function y20() {
+    var s = '<rect x="146" y="200" width="8" height="136" rx="4"' + sk(WOOD, 3) + '/>', cs = [RED, YEL, BLUE, PINK];
+    for (var i = 0; i < 4; i++) {
+      s += '<g transform="rotate(' + (i * 90) + ' 150 190)"><path d="M150 190 L150 112 Q200 120 196 190 Z"' + sk(cs[i], 3) + '/></g>';
+    }
+    return s + '<circle cx="150" cy="190" r="9"' + sk(CREAM, 3) + '/>';
+  }
+
+  var YSCENES = [
+    { pal: "pink",  bd: "rays",    art: y1,  top: "GOO GOO!",     bottom: "SORRY, WHIPPERSNAPPER!" },
+    { pal: "olive", bd: "stripes", art: y2,  top: "ATTENTION!",   bottom: "NAP TIME, RECRUIT!" },
+    { pal: "sky",   bd: "dots",    art: y3,  top: "SHAKE IT!",    bottom: "STILL A BABY, KID!" },
+    { pal: "mint",  bd: "stars",   art: y4,  top: "HUGS ISSUED!", bottom: "TOO YOUNG FOR THIS WAR" },
+    { pal: "lilac", bd: "checker", art: y5,  top: "MILK RATION!", bottom: "ONE BOTTLE PER KID" },
+    { pal: "sky",   bd: "bunting", art: y6,  top: "A B C!",       bottom: "JUST LEARNING ABCS" },
+    { pal: "sky",   bd: "rays",    art: y7,  top: "QUACK!",       bottom: "BATH TIME, KID" },
+    { pal: "mint",  bd: "dots",    art: y8,  top: "UP, UP!",      bottom: "YOUTH DETECTED" },
+    { pal: "lilac", bd: "stars",   art: y9,  top: "GIDDYUP!",     bottom: "RIDE ON, YOUNGSTER" },
+    { pal: "navy",  bd: "stars",   art: y10, top: "SWEET DREAMS", bottom: "NO WAR STORIES HERE" },
+    { pal: "sun",   bd: "checker", art: y11, top: "ALL ABOARD!",  bottom: "CHOO CHOO, KID" },
+    { pal: "sky",   bd: "dots",    art: y12, top: "FLY HIGH!",    bottom: "THE FUTURE IS YOURS" },
+    { pal: "sun",   bd: "rays",    art: y13, top: "SIP SIP!",     bottom: "SIPPY CUP BRIGADE" },
+    { pal: "mint",  bd: "rays",    art: y14, top: "SO SOFT!",     bottom: "BORN YESTERDAY" },
+    { pal: "lilac", bd: "dots",    art: y15, top: "TINY BOOTS!",  bottom: "NOT FOR MARCHING" },
+    { pal: "sky",   bd: "bunting", art: y16, top: "NEW HERE!",    bottom: "JUST GETTING STARTED" },
+    { pal: "lilac", bd: "stripes", art: y17, top: "SCROLL ON!",   bottom: "HISTORY CAN WAIT" },
+    { pal: "sun",   bd: "stripes", art: y18, top: "KICKFLIP!",    bottom: "RADICAL YOUNGSTER" },
+    { pal: "pink",  bd: "rays",    art: y19, top: "TURN IT UP!",  bottom: "YOUTH ON THE AIR" },
+    { pal: "mint",  bd: "stripes", art: y20, top: "SPIN IT!",     bottom: "YOUNG AND BREEZY" }
+  ];
+
+  var YQUIPS = [
+    "Go play. The war stories can wait.",
+    "Come back when you have some gray hair.",
+    "Finish your juice, kid. History will still be here.",
+    "Nothing to inspect here. Carry on, junior."
+  ];
+
+  var lastY = -1;
+  function youngPosterSVG() {
+    var i;
+    do { i = Math.floor(Math.random() * YSCENES.length); } while (i === lastY && YSCENES.length > 1);
+    lastY = i;
+    return buildScene(YSCENES[i]);
+  }
+
+  var lastScene = -1;
+  function posterSVG() {
+    var i;
+    do { i = Math.floor(Math.random() * SCENES.length); } while (i === lastScene && SCENES.length > 1);
+    lastScene = i;
+    return buildScene(SCENES[i]);
+  }
+
+  function render(birthMs) {
+    var r = judge(birthMs, now);
+    var when = r.beforeWar ? yrs(r.daysToWar) + " years before V-J Day" : yrs(r.daysToWar) + " years after V-J Day";
+    var math =
+      '<div class="math">' +
+      '<span>Born: <b>' + fmtDate(birthMs) + '</b></span>' +
+      '<span>Distance to V-J Day (2 Sep 1945): <b>' + yrs(r.daysToWar) + ' yrs</b> (' + (r.beforeWar ? "before" : "after") + ')</span>' +
+      '<span>Distance to today: <b>' + yrs(r.daysToNow) + ' yrs</b></span>' +
+      '</div>';
+    var html;
+    if (r.closerToWar) {
+      var q = QUIPS[Math.floor(Math.random() * QUIPS.length)];
+      html =
+        '<figure class="poster-wrap">' + posterSVG() +
+        '<figcaption>Original illustration in the style of 1940s posters. Reload for a new one.</figcaption></figure>' +
+        '<div class="verdict"><span class="stamp">Closer to the war</span>' +
+        '<h2>You are old.</h2><p>' + q + '</p>' + math + '</div>';
+    } else {
+      var yq = YQUIPS[Math.floor(Math.random() * YQUIPS.length)];
+      html =
+        '<figure class="poster-wrap">' + youngPosterSVG() +
+        '<figcaption>Original illustration. Reload for a new one.</figcaption></figure>' +
+        '<div class="verdict"><span class="stamp young">Closer to today</span>' +
+        '<h2>Sorry, young whippersnapper.</h2>' +
+        '<p>' + yq + '</p>' + math + '</div>';
+    }
+    document.getElementById("result").innerHTML = html;
+
+    var y = document.getElementById("you");
+    y.hidden = false;
+    y.style.left = Math.max(2, Math.min(98, pct(birthMs))) + "%";
+  }
+
+  document.getElementById("f").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = document.getElementById("err");
+    var v = document.getElementById("dob").value;
+    err.textContent = "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { err.textContent = "Enter a full date of birth."; return; }
+    var p = v.split("-");
+    var ms = Date.UTC(+p[0], +p[1] - 1, +p[2]);
+    if (isNaN(ms) || +p[0] < 1880) { err.textContent = "That date is not in range. Try again."; return; }
+    if (ms > now) { err.textContent = "That date is in the future. Enter your actual birthday."; return; }
+    render(ms);
+  });
+
+  var d = new Date();
+  var todayStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  document.getElementById("dob").max = todayStr;
+})();
+</script>
+
+</html>
