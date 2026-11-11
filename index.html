@@ -1118,7 +1118,6 @@ figure { margin: 0; }
       cta: "Are you officially old?"
     };
     document.getElementById("result").innerHTML = html;
-    paintSound();
 
     var y = document.getElementById("you");
     y.hidden = false;
@@ -1182,7 +1181,6 @@ figure { margin: 0; }
       cta: "Check yours:"
     };
     $("result").innerHTML = html;
-    paintSound();
     var y = $("you");
     y.hidden = false;
     y.style.left = Math.max(2, Math.min(98, pct(ms))) + "%";
@@ -1252,114 +1250,8 @@ figure { margin: 0; }
   });
 
 
-  // ---- sound begin
-  var AC = window.AudioContext || window.webkitAudioContext, actx = null, noiseBuf = null;
-  function audio() {
-    if (!AC) return null;
-    try { if (!actx) actx = new AC(); if (actx.state === "suspended") actx.resume(); } catch (e) { return null; }
-    return actx;
-  }
-  function noise(c) {
-    if (!noiseBuf || noiseBuf.sampleRate !== c.sampleRate) {
-      noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.3), c.sampleRate);
-      var d = noiseBuf.getChannelData(0);
-      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    }
-    return noiseBuf;
-  }
-  function burst(c, out, t, o) {
-    var src = c.createBufferSource(); src.buffer = noise(c);
-    var f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = o.freq; f.Q.value = o.q || 1;
-    var g = c.createGain(); g.gain.setValueAtTime(o.gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + o.dur);
-    src.connect(f); f.connect(g); g.connect(out);
-    src.start(t, Math.random() * 0.1); src.stop(t + o.dur + 0.02);
-  }
-  function tone(c, out, t, o) {
-    var os = c.createOscillator(); os.type = o.type || "sine"; os.frequency.setValueAtTime(o.f0, t);
-    if (o.f1) os.frequency.exponentialRampToValueAtTime(o.f1, t + o.dur);
-    var g = c.createGain(); g.gain.setValueAtTime(o.gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + o.dur);
-    os.connect(g); g.connect(out);
-    os.start(t); os.stop(t + o.dur + 0.02);
-  }
-  function playTypewriter(c, out, t0) {
-    var t = t0, i;
-    for (i = 0; i < 16; i++) {
-      burst(c, out, t, { freq: 2200, q: 1.1, gain: 0.55, dur: 0.045 });
-      burst(c, out, t + 0.012, { freq: 4200, q: 3, gain: 0.25, dur: 0.03 });
-      tone(c, out, t, { f0: 150, f1: 70, gain: 0.5, dur: 0.07 });
-      t += 0.075 + Math.random() * 0.09 + (i % 5 === 4 ? 0.08 : 0);
-    }
-    burst(c, out, t + 0.05, { freq: 900, q: 0.8, gain: 0.7, dur: 0.12 });
-    tone(c, out, t + 0.12, { f0: 2350, gain: 0.25, dur: 1.1 });
-    tone(c, out, t + 0.12, { f0: 3520, gain: 0.12, dur: 0.8 });
-    return t + 1.3;
-  }
-  function sweepNoise(c, out, t, o) {
-    var src = c.createBufferSource(); src.buffer = noise(c); src.loop = true;
-    var f = c.createBiquadFilter(); f.type = o.type || "bandpass"; f.Q.value = o.q || 1;
-    f.frequency.setValueAtTime(o.f0, t); f.frequency.exponentialRampToValueAtTime(o.f1, t + o.dur);
-    var g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(o.gain, t + 0.03); g.gain.setValueAtTime(o.gain, t + o.dur - 0.05); g.gain.linearRampToValueAtTime(0.0001, t + o.dur);
-    src.connect(f); f.connect(g); g.connect(out);
-    src.start(t); src.stop(t + o.dur + 0.02);
-  }
-  function buzz(c, out, t, o) {
-    var os = c.createOscillator(); os.type = "sawtooth";
-    os.frequency.setValueAtTime(o.f0, t); os.frequency.linearRampToValueAtTime(o.f1, t + o.dur);
-    var f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1500; f.Q.value = 1.5;
-    var g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(o.gain, t + 0.02); g.gain.setValueAtTime(o.gain, t + o.dur - 0.03); g.gain.linearRampToValueAtTime(0.0001, t + o.dur);
-    os.connect(f); f.connect(g); g.connect(out);
-    os.start(t); os.stop(t + o.dur + 0.02);
-  }
-  function playPrinter(c, out, t0) {
-    var t = t0, i;
-    tone(c, out, t, { type: "triangle", f0: 70, f1: 150, gain: 0.25, dur: 0.3 });
-    t += 0.3;
-    for (i = 0; i < 5; i++) {
-      var left = i % 2 === 0;
-      buzz(c, out, t, { f0: left ? 190 : 300, f1: left ? 300 : 190, gain: 0.13, dur: 0.26 });
-      sweepNoise(c, out, t, { f0: 2400, f1: 3200, q: 2, gain: 0.07, dur: 0.26 });
-      t += 0.26;
-      burst(c, out, t + 0.01, { freq: 700, q: 0.8, gain: 0.3, dur: 0.06 });
-      tone(c, out, t + 0.01, { f0: 120, f1: 80, gain: 0.25, dur: 0.07 });
-      t += 0.09;
-    }
-    sweepNoise(c, out, t, { type: "highpass", f0: 600, f1: 2600, q: 0.7, gain: 0.12, dur: 0.4 });
-    burst(c, out, t + 0.42, { freq: 800, q: 0.8, gain: 0.4, dur: 0.07 });
-    tone(c, out, t + 0.42, { f0: 130, f1: 70, gain: 0.35, dur: 0.1 });
-    return t + 0.6;
-  }
-  // ---- sound end
-
-  var soundOn = true;
-  try { if (window.localStorage.getItem("oldInspectorSound") === "off") soundOn = false; } catch (e) {}
-  function paintSound() {
-    var b = $("snd");
-    if (!b) return;
-    b.textContent = "Sound: " + (soundOn ? "on" : "off");
-    b.setAttribute("aria-pressed", soundOn ? "true" : "false");
-  }
-  function playSound(closerToWar) {
-    if (!soundOn) return;
-    var c = audio();
-    if (!c) return;
-    try {
-      var out = c.createGain(); out.gain.value = closerToWar ? 0.35 : 0.6; out.connect(c.destination);
-      (closerToWar ? playTypewriter : playPrinter)(c, out, c.currentTime + 0.05);
-    } catch (e) {}
-  }
-  $("result").addEventListener("click", function (e) {
-    var tg = e.target.closest ? e.target.closest("#snd") : null;
-    if (!tg) return;
-    soundOn = !soundOn;
-    try { window.localStorage.setItem("oldInspectorSound", soundOn ? "on" : "off"); } catch (e) {}
-    paintSound();
-    if (soundOn) audio();
-  });
-
   // ---- share image
-  var SHARE_BTN = '<div class="shareRow"><button type="button" class="share" id="share">Share this result</button><button type="button" class="chip" id="snd" aria-pressed="true">Sound: on</button></div>';
+  var SHARE_BTN = '<div class="shareRow"><button type="button" class="share" id="share">Share this result</button></div>';
   var last = null, lastSvg = "";
   function keepSvg(t) { lastSvg = t; return t; }
   function distLine(r) {
@@ -1494,7 +1386,6 @@ figure { margin: 0; }
   function startShare(btn) {
     if (!last || !lastSvg) return;
     last.caption = last.sub + " " + last.cta + " " + shareUrl();
-    playSound(last.war);
     var tok = ++shareTok;
     showOverlay();
     drawCard().then(function (cv) {
