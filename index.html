@@ -105,17 +105,23 @@ input::placeholder { color: var(--muted); opacity: 0.7; }
 .sheet { width: 100%; max-width: 30rem; background: var(--card); color: var(--ink); border: 2px solid var(--ink); padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
 .sheet h3 { font-family: var(--font-display); font-size: 1.4rem; line-height: 1; margin: 0; text-transform: uppercase; }
 .sheet img { width: 100%; max-height: 62vh; object-fit: contain; border: 2px solid var(--ink); background: var(--paper); }
-.sheet textarea { width: 100%; min-height: 4.5rem; font: 500 1rem var(--font-body); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 0; padding: 0.5rem; resize: vertical; }
+.sheet textarea { width: 100%; min-height: 7rem; font: 500 1.3rem/1.3 var(--font-body); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 0; padding: 0.5rem; resize: vertical; }
 .hint { margin: 0; font-size: 0.95rem; color: var(--muted); }
-.actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.actions > .share, .actions > .btnlink, .actions > .chip { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-height: 2.9rem; margin: 0; padding: 0 1.1rem; line-height: 1; box-shadow: none; transform: none; border: 2px solid var(--ink); border-radius: 0; font: 500 1.1rem var(--font-body); text-transform: none; letter-spacing: 0; text-decoration: none; cursor: pointer; }
+.actions > .share { background: var(--red); color: #f6f1e0; font: 700 1.2rem var(--font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+.actions > .btnlink, .actions > .chip { background: var(--paper); color: var(--ink); }
+.actions > .btnlink:hover, .actions > .chip:hover { background: var(--mustard); }
+.actions > .share:hover { background: #8f1d14; }
 .btnlink { display: inline-block; font: 500 0.95rem var(--font-body); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); padding: 0.3rem 0.8rem; text-decoration: none; }
 .btnlink:hover { background: var(--mustard); }
 .btnlink:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
-.more { position: fixed; left: calc(10px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5; width: 58px; height: 84px; padding: 0; display: grid; place-items: center; background: none; border: 0; box-shadow: none; color: var(--red); cursor: pointer; }
+.more { position: fixed; left: max(calc(6px + env(safe-area-inset-left, 0px)), calc(50% - 17rem - 70px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 5; width: 58px; height: 84px; padding: 0; display: grid; place-items: center; background: none; border: 0; box-shadow: none; color: var(--red); cursor: pointer; }
 .more svg { width: 58px; height: 84px; display: block; overflow: visible; filter: drop-shadow(3px 3px 0 var(--ink)); }
 .more:hover, .more:active { transform: none; box-shadow: none; background: none; }
 .more:hover svg { filter: drop-shadow(4px 4px 0 var(--ink)); }
 .more:active svg { filter: drop-shadow(1px 1px 0 var(--ink)); }
+@media (max-width: 40rem) { .more, .more svg { width: 40px; height: 58px; } }
 .more:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) {
   .more svg { animation: nudge 1.4s ease-in-out infinite; }
@@ -244,7 +250,7 @@ figure { margin: 0; }
 </div>
 
 <button type="button" class="more" id="more" aria-label="Scroll down for more" hidden>
-  <svg viewBox="0 0 58 84" aria-hidden="true"><g transform="rotate(-14 29 42)"><path fill="currentColor" d="M17 0 L39 0 L39 40 L58 40 L26 84 L0 40 L17 40 Z"/></g></svg>
+  <svg viewBox="0 0 58 84" aria-hidden="true"><path fill="currentColor" d="M18 0 L40 0 L40 40 L58 40 L29 84 L0 40 L18 40 Z"/></svg>
 </button>
 
 <script>
