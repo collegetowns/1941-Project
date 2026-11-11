@@ -60,7 +60,7 @@ h1 { font-family: var(--font-display); font-size: clamp(2rem, 9vw, 3rem); line-h
 form { display: flex; flex-wrap: wrap; align-items: end; gap: 0.75rem; }
 .field { display: flex; flex-direction: column; gap: 0.3rem; flex: 1 1 12rem; min-width: 0; }
 label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
-input[type="date"] {
+input[type="date"], input[type="text"] {
   font: 600 1.1rem var(--font-mono);
   color: var(--ink);
   background: var(--card);
@@ -84,6 +84,42 @@ button {
 }
 button:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
 button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+.chip { font: 500 0.9rem var(--font-body); text-transform: none; letter-spacing: 0; color: var(--ink); background: var(--card); padding: 0.2rem 0.6rem; box-shadow: none; }
+.chip:hover { background: var(--mustard); transform: none; box-shadow: none; }
+.chip:active { transform: none; box-shadow: none; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: -0.4rem; }
+.chips > span { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.fields { display: flex; flex-wrap: wrap; gap: 0.75rem; flex: 1 1 14rem; min-width: 0; }
+.mode { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex: 1 1 100%; }
+.mode label { position: relative; flex: 1 1 0; text-align: center; cursor: pointer; font: 700 0.9rem var(--font-display); letter-spacing: 0.02em; padding: 0.5rem 0.3rem; white-space: nowrap; border: 2px solid var(--ink); background: var(--card); color: var(--ink); }
+.mode label + label { border-left: 0; }
+.mode label.on { background: var(--ink); color: var(--paper); }
+.mode label:focus-within { outline: 3px solid var(--mustard); outline-offset: 2px; }
+.mode input { position: absolute; opacity: 0; pointer-events: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+input::placeholder { color: var(--muted); opacity: 0.7; }
+.shareRow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.2rem; }
+.share { align-self: flex-start; font-size: 1.05rem; padding: 0.5rem 1rem; margin-top: 0.2rem; }
+.share:disabled { opacity: 0.6; cursor: progress; }
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(20, 22, 15, 0.82); overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.sheet { width: 100%; max-width: 30rem; background: var(--card); color: var(--ink); border: 2px solid var(--ink); padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+.sheet h3 { font-family: var(--font-display); font-size: 1.4rem; line-height: 1; margin: 0; text-transform: uppercase; }
+.sheet img { width: 100%; max-height: 62vh; object-fit: contain; border: 2px solid var(--ink); background: var(--paper); }
+.sheet textarea { width: 100%; min-height: 4.5rem; font: 500 1rem var(--font-body); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 0; padding: 0.5rem; resize: vertical; }
+.hint { margin: 0; font-size: 0.95rem; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.btnlink { display: inline-block; font: 500 0.95rem var(--font-body); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); padding: 0.3rem 0.8rem; text-decoration: none; }
+.btnlink:hover { background: var(--mustard); }
+.btnlink:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+.more { position: fixed; left: calc(50% - 22px); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 5; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--red); }
+.more:hover { box-shadow: 4px 4px 0 var(--red); }
+.more:active { box-shadow: 1px 1px 0 var(--red); }
+.more svg { width: 22px; height: 22px; display: block; }
+@media (prefers-reduced-motion: no-preference) {
+  .more svg { animation: nudge 1.4s ease-in-out infinite; }
+  @keyframes nudge { 0%, 100% { transform: translateY(-2px); } 50% { transform: translateY(3px); } }
+}
+[hidden] { display: none !important; }
 button:focus-visible, input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
 .err { font-family: var(--font-mono); font-size: 0.85rem; color: var(--red); margin: 0; min-height: 1.2em; }
 
@@ -130,16 +166,41 @@ figure { margin: 0; }
   <header class="mast">
     <div class="form-no">Age inspection by <a href="https://collegetowns.org" target="_blank" rel="noopener">College Towns</a></div>
     <h1>Are You Officially Old?</h1>
-    <p class="lede">Enter your date of birth. We measure whether you were born closer to the end of World War II or to today.</p>
+    <p class="lede" id="lede">Enter your year or date of birth. We measure whether you were born closer to the end of World War II or to today.</p>
   </header>
 
   <form id="f" novalidate>
-    <div class="field">
-      <label for="dob">Date of birth</label>
-      <input id="dob" type="date" min="1880-01-01" required>
+    <fieldset class="mode">
+      <legend class="sr">What are you checking?</legend>
+      <label class="on"><input type="radio" name="mode" value="person" checked>A birthday</label>
+      <label><input type="radio" name="mode" value="thing">An event</label>
+    </fieldset>
+    <div class="fields" id="fields-person">
+      <div class="field">
+        <label for="dob">Year or date of birth</label>
+        <input id="dob" type="text" placeholder="1975 or 3/2/1975" autocomplete="off">
+      </div>
     </div>
-    <button type="submit">Report in</button>
+    <div class="fields" id="fields-thing" hidden>
+      <div class="field">
+        <label for="thing">What is it? (optional)</label>
+        <input id="thing" type="text" maxlength="60" placeholder="MTV" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="when">Year or date</label>
+        <input id="when" type="text" placeholder="1981 or 8/1/1981" autocomplete="off">
+      </div>
+    </div>
+    <button type="submit" id="go">Report in</button>
   </form>
+  <div class="chips" id="chips" hidden>
+    <span>Try</span>
+    <button type="button" class="chip" data-name="MTV" data-when="1981">MTV · 1981</button>
+    <button type="button" class="chip" data-name="Star Wars" data-when="1977">Star Wars · 1977</button>
+    <button type="button" class="chip" data-name="Back to the Future" data-when="1985">Back to the Future · 1985</button>
+    <button type="button" class="chip" data-name="Titanic" data-when="1997">Titanic · 1997</button>
+    <button type="button" class="chip" data-name="The first iPhone" data-when="2007">The first iPhone · 2007</button>
+  </div>
   <p class="err" id="err" role="alert"></p>
 
   <section class="timeline" aria-label="Timeline from the end of World War II to today">
@@ -163,6 +224,25 @@ figure { margin: 0; }
 
   <p class="sponsor">Part of the 1941 Project on <a href="https://collegetowns.org/" target="_blank" rel="noopener">CollegeTowns.org</a></p>
 </main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="ov-title" hidden>
+  <div class="sheet">
+    <h3 id="ov-title">Your share image</h3>
+    <img id="ov-img" alt="Share image with your result">
+    <p class="hint">On a phone, press and hold the image to save it. On a computer, use Download or right-click the image.</p>
+    <div class="actions">
+      <a class="btnlink" id="ov-dl" download="are-you-officially-old.png" href="#">Download image</a>
+      <button type="button" class="chip" id="ov-copy">Copy caption</button>
+      <button type="button" class="chip" id="ov-close">Close</button>
+    </div>
+    <textarea id="ov-text" readonly aria-label="Caption to post with the image"></textarea>
+    <p class="hint" id="ov-msg" role="status"></p>
+  </div>
+</div>
+
+<button type="button" class="more" id="more" aria-label="Scroll down for more" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="square" aria-hidden="true"><path d="M12 4v15M5 13l7 7 7-7"/></svg>
+</button>
 
 <script>
 (function () {
@@ -764,6 +844,228 @@ figure { margin: 0; }
     return buildScene(YSCENES[i]);
   }
 
+  var ORANGE2 = "#e8742a";
+  function tx(x, y, size, fill, s, anchor) {
+    return '<text x="' + x + '" y="' + y + '" text-anchor="' + (anchor || "middle") + '" style="font-family:var(--font-display)" font-size="' + size + '" fill="' + fill + '">' + s + '</text>';
+  }
+
+  function t1() { // television
+    var s = ln('M150 126 L108 82', INK, 5) + ln('M150 126 L196 90', INK, 5) +
+      '<circle cx="108" cy="82" r="5" fill="' + INK + '"/><circle cx="196" cy="90" r="5" fill="' + INK + '"/>' +
+      ln('M92 296 L82 326', INK, 9) + ln('M208 296 L218 326', INK, 9) +
+      '<rect x="50" y="126" width="200" height="170" rx="20"' + sk(WOOD, 5) + '/>' +
+      '<rect x="66" y="142" width="128" height="138" rx="16"' + sk("#bfe3f5", 4) + '/>';
+    [CREAM, YEL, "#3fb0c8", MINT, PINK, RED].forEach(function (c, i) { s += '<rect x="' + (74 + i * 19) + '" y="152" width="19" height="104" fill="' + c + '"/>'; });
+    s += '<rect x="74" y="256" width="114" height="14" fill="#2a2e20"/>' +
+      '<ellipse cx="88" cy="160" rx="12" ry="5" fill="#fff" opacity="0.5" transform="rotate(-30 88 160)"/>' +
+      '<circle cx="222" cy="170" r="11"' + sk(GOLD, 3) + '/><circle cx="222" cy="206" r="11"' + sk(GOLD, 3) + '/>' +
+      ln('M208 238 H238 M208 250 H238 M208 262 H238', INK, 3);
+    return s;
+  }
+  function t2() { // trophy
+    return ln('M100 124 H72 Q64 124 66 136 Q72 172 104 176', INK, 16) + ln('M100 124 H72 Q64 124 66 136 Q72 172 104 176', GOLD, 8) +
+      ln('M200 124 H228 Q236 124 234 136 Q228 172 196 176', INK, 16) + ln('M200 124 H228 Q236 124 234 136 Q228 172 196 176', GOLD, 8) +
+      '<path d="M100 112 H200 V160 Q200 206 150 214 Q100 206 100 160 Z"' + sk(GOLD, 5) + '/>' +
+      '<g' + sk(WHITEY, 3) + '>' + star(150, 160, 26) + '</g>' +
+      ln('M114 126 V158', WHITEY, 5).replace('stroke-linecap="round"', 'stroke-linecap="round" opacity="0.5"') +
+      '<rect x="138" y="212" width="24" height="36"' + sk(GOLD, 4) + '/>' +
+      '<rect x="104" y="246" width="92" height="18" rx="4"' + sk(WOOD, 4) + '/>' +
+      '<rect x="92" y="262" width="116" height="34" rx="4"' + sk(WOOD, 4) + '/><rect x="126" y="272" width="48" height="14"' + sk(GOLD, 2) + '/>';
+  }
+  function t3() { // light bulb
+    var s = '';
+    [-80, -40, 0, 40, 80].forEach(function (a) {
+      var r = a * Math.PI / 180, cx = 150, cy = 158;
+      s += ln('M' + (cx + 66 * Math.sin(r)).toFixed(1) + ' ' + (cy - 66 * Math.cos(r)).toFixed(1) + ' L' + (cx + 82 * Math.sin(r)).toFixed(1) + ' ' + (cy - 82 * Math.cos(r)).toFixed(1), CREAM, 6);
+    });
+    return s +
+      '<path d="M112 206 Q96 182 98 160 A52 52 0 1 1 202 160 Q204 182 188 206 Q180 218 180 228 H120 Q120 218 112 206 Z"' + sk(YEL, 5) + '/>' +
+      ln('M130 228 V194 L140 174 L150 194 L160 174 L170 194 V228', INK, 3) +
+      '<ellipse cx="126" cy="132" rx="10" ry="18" transform="rotate(30 126 132)" fill="#fff" opacity="0.5"/>' +
+      '<rect x="118" y="228" width="64" height="14"' + sk("#b8bcc6", 4) + '/><rect x="122" y="242" width="56" height="12"' + sk("#8892a6", 3) + '/><rect x="130" y="254" width="40" height="12" rx="6" fill="' + INK + '"/>';
+  }
+  function t4() { // open book
+    return '<path d="M44 290 Q100 276 150 296 Q200 276 256 290 V302 Q200 290 150 310 Q100 290 44 302 Z"' + sk(RED, 4) + '/>' +
+      '<path d="M150 126 Q100 108 56 120 V284 Q100 272 150 292 Z"' + sk(WHITEY, 4) + '/>' +
+      '<path d="M150 126 Q200 108 244 120 V284 Q200 272 150 292 Z"' + sk(WHITEY, 4) + '/>' +
+      ln('M76 150 Q110 144 134 152 M76 172 Q110 166 134 174 M76 194 Q110 188 134 196 M76 216 Q110 210 134 218', INK, 3) +
+      ln('M224 150 Q190 144 166 152 M224 172 Q190 166 166 174 M224 194 Q190 188 166 196 M224 216 Q190 210 166 218', INK, 3) +
+      '<polygon points="170,292 170,326 179,318 188,326 188,292"' + sk(BLUE, 3) + '/>';
+  }
+  function t5() { // rotary phone
+    var s = '<path d="M40 314 Q40 236 90 214 Q150 196 210 214 Q260 236 260 314 Z"' + sk(RED, 5) + '/>' +
+      '<path d="M56 176 Q56 150 80 150 H220 Q244 150 244 176 Q244 190 232 190 L208 190 Q200 176 188 176 H112 Q100 176 92 190 L68 190 Q56 190 56 176 Z"' + sk("#8f1d17", 4) + '/>' +
+      '<circle cx="150" cy="264" r="56"' + sk(CREAM, 4) + '/>';
+    for (var k = 0; k < 10; k++) {
+      var a = (60 + k * 30) * Math.PI / 180;
+      s += '<circle cx="' + (150 + 40 * Math.cos(a)).toFixed(1) + '" cy="' + (264 + 40 * Math.sin(a)).toFixed(1) + '" r="8" fill="#2a2e20"/>';
+    }
+    return s + '<circle cx="150" cy="264" r="15"' + sk(WHITEY, 3) + '/>';
+  }
+  function t6() { // clapperboard
+    var s = '<rect x="60" y="176" width="180" height="140"' + sk("#2a2e20", 4) + '/>';
+    var i;
+    for (i = 0; i < 6; i += 2) s += '<polygon points="' + (60 + i * 30) + ',176 ' + (90 + i * 30) + ',176 ' + (105 + i * 30) + ',156 ' + (75 + i * 30) + ',156" fill="' + CREAM + '"/>';
+    s += ln('M76 214 H224 M76 240 H224 M76 266 H224 M76 292 H190', CREAM, 3) +
+      tx(78, 206, 13, CREAM, "SCENE 1", "start") + tx(222, 206, 13, CREAM, "TAKE 1", "end");
+    s += '<g transform="rotate(-14 62 150)"><rect x="60" y="128" width="180" height="30"' + sk("#2a2e20", 4) + '/>';
+    for (i = 0; i < 6; i += 2) s += '<polygon points="' + (60 + i * 30) + ',158 ' + (90 + i * 30) + ',158 ' + (105 + i * 30) + ',128 ' + (75 + i * 30) + ',128" fill="' + CREAM + '"/>';
+    return s + '</g>';
+  }
+  function t7() { // popcorn
+    var s = '';
+    [[110, 176, 18], [200, 184, 16], [126, 150, 16], [190, 150, 15], [142, 162, 20], [176, 168, 19], [160, 140, 17]].forEach(function (k) {
+      s += '<circle cx="' + k[0] + '" cy="' + k[1] + '" r="' + k[2] + '"' + sk(CREAM, 3) + '/><circle cx="' + (k[0] + 4) + '" cy="' + (k[1] - 3) + '" r="' + (k[2] * 0.4).toFixed(1) + '" fill="' + YEL + '"/>';
+    });
+    s += '<path d="M92 190 L208 190 L196 310 L104 310 Z"' + sk(WHITEY, 5) + '/>';
+    for (var i = 0; i < 6; i += 2) {
+      var t0 = 92 + i * (116 / 6), t1 = 92 + (i + 1) * (116 / 6), b0 = 104 + i * (92 / 6), b1 = 104 + (i + 1) * (92 / 6);
+      s += '<polygon points="' + t0.toFixed(1) + ',190 ' + t1.toFixed(1) + ',190 ' + b1.toFixed(1) + ',310 ' + b0.toFixed(1) + ',310" fill="' + RED + '"/>';
+    }
+    return s + '<path d="M92 190 L208 190 L196 310 L104 310 Z" fill="none" stroke="' + INK + '" stroke-width="5" stroke-linejoin="round"/>';
+  }
+  function t8() { // game controller
+    return ln('M150 274 Q150 312 118 324', INK, 5) +
+      '<rect x="40" y="170" width="220" height="104" rx="10"' + sk("#d8d4c4", 5) + '/>' +
+      '<rect x="52" y="182" width="196" height="80" rx="6"' + sk("#3b3f4a", 3) + '/>' +
+      '<rect x="80" y="214" width="48" height="16" fill="#0e0f12" stroke="' + CREAM + '" stroke-width="1.5"/><rect x="96" y="198" width="16" height="48" fill="#0e0f12" stroke="' + CREAM + '" stroke-width="1.5"/>' +
+      '<rect x="138" y="232" width="22" height="9" rx="4" fill="#8a8a94"/><rect x="164" y="232" width="22" height="9" rx="4" fill="#8a8a94"/>' +
+      '<circle cx="204" cy="224" r="13"' + sk(RED, 3) + '/><circle cx="232" cy="224" r="13"' + sk(RED, 3) + '/>';
+  }
+  function t9() { // floppy disk
+    return '<path d="M70 118 Q70 110 78 110 H206 L230 134 V292 Q230 300 222 300 H78 Q70 300 70 292 Z"' + sk(BLUE, 5) + '/>' +
+      '<rect x="104" y="110" width="92" height="56"' + sk("#b8bcc6", 3) + '/><rect x="166" y="120" width="16" height="36" fill="#4a4e5a"/>' +
+      '<rect x="92" y="206" width="116" height="78" rx="3"' + sk(WHITEY, 3) + '/>' +
+      ln('M104 228 H196 M104 246 H196 M104 264 H170', INK, 2) + '<rect x="92" y="206" width="116" height="10" fill="' + RED + '"/>';
+  }
+  function t10() { // instant camera
+    var s = '<rect x="100" y="100" width="100" height="62"' + sk(WHITEY, 3) + '/><rect x="108" y="108" width="84" height="36" fill="#bfe3f5"/><circle cx="130" cy="124" r="8" fill="' + YEL + '"/>' +
+      '<rect x="50" y="150" width="200" height="146" rx="16"' + sk(WHITEY, 5) + '/>';
+    [RED, ORANGE2, YEL, MINT].forEach(function (c, i) { s += '<rect x="50" y="' + (200 + i * 6) + '" width="200" height="6" fill="' + c + '"/>'; });
+    s += '<circle cx="150" cy="258" r="38"' + sk("#2a2e20", 5) + '/><circle cx="150" cy="258" r="26" fill="#3b4a6a"/><circle cx="150" cy="258" r="12" fill="#14151a"/><circle cx="141" cy="249" r="5" fill="#fff"/>' +
+      '<rect x="198" y="162" width="34" height="22" rx="3"' + sk(CREAM, 3) + '/><rect x="68" y="164" width="30" height="20" rx="3"' + sk("#b8bcc6", 3) + '/>';
+    return s;
+  }
+  function t11() { // retro computer
+    var s = '<rect x="126" y="250" width="48" height="24"' + sk("#cfc6a2", 3) + '/>' +
+      '<rect x="68" y="104" width="164" height="150" rx="16"' + sk("#dcd2b0", 5) + '/>' +
+      '<rect x="84" y="120" width="132" height="98" rx="10"' + sk("#1d3a2a", 4) + '/>' +
+      ln('M98 142 H152 M98 160 H134', "#7ee8a0", 5) + '<rect x="140" y="154" width="12" height="12" fill="#7ee8a0"/>' +
+      '<rect x="110" y="230" width="70" height="8" rx="2" fill="#8a8574"/><circle cx="206" cy="234" r="4" fill="' + RED + '"/>' +
+      '<rect x="50" y="274" width="200" height="40" rx="6"' + sk("#cfc6a2", 4) + '/>';
+    for (var r = 0; r < 2; r++) for (var c = 0; c < 10; c++) s += '<rect x="' + (58 + c * 19) + '" y="' + (280 + r * 15) + '" width="15" height="10" rx="2" fill="' + WHITEY + '"/>';
+    return s;
+  }
+  function t12() { // newspaper
+    return '<g transform="rotate(-4 150 210)"><rect x="62" y="100" width="176" height="220"' + sk("#efe6c6", 5) + '/>' +
+      tx(150, 132, 20, INK, "THE DAILY NEWS") + ln('M74 142 H226', INK, 3) +
+      tx(150, 182, 40, RED, "EXTRA!") +
+      '<rect x="78" y="194" width="68" height="52"' + sk("#b9b28f", 2) + '/><circle cx="100" cy="212" r="8" fill="' + YEL + '"/><path d="M78 246 L104 224 L124 238 L146 220 V246Z" fill="#7a8460"/>' +
+      ln('M156 200 H224 M156 212 H224 M156 224 H224 M156 236 H224', INK, 3) +
+      ln('M78 262 H224 M78 274 H224 M78 286 H224 M78 298 H190', INK, 3) + '</g>';
+  }
+  function t13() { // pocket watch
+    var s = ln('M150 108 Q112 70 76 96 Q56 112 74 134', GOLD, 6) +
+      '<circle cx="150" cy="98" r="12" fill="none" stroke="' + GOLD + '" stroke-width="6"/><rect x="138" y="106" width="24" height="16"' + sk(GOLD, 3) + '/>' +
+      '<circle cx="150" cy="214" r="94"' + sk(GOLD, 6) + '/><circle cx="150" cy="214" r="78"' + sk(CREAM, 3) + '/>';
+    for (var i = 0; i < 12; i++) {
+      var a = i * 30 * Math.PI / 180;
+      s += ln('M' + (150 + 66 * Math.sin(a)).toFixed(1) + ' ' + (214 - 66 * Math.cos(a)).toFixed(1) + ' L' + (150 + 74 * Math.sin(a)).toFixed(1) + ' ' + (214 - 74 * Math.cos(a)).toFixed(1), INK, i % 3 ? 2 : 4);
+    }
+    return s + tx(150, 172, 18, INK, "12") + tx(196, 221, 18, INK, "3") + tx(150, 278, 18, INK, "6") + tx(104, 221, 18, INK, "9") +
+      ln('M150 214 L150 160', INK, 6) + ln('M150 214 L186 234', INK, 8) + ln('M150 214 L120 250', RED, 2) + '<circle cx="150" cy="214" r="7" fill="' + INK + '"/>';
+  }
+  function t14() { // rocket
+    return '<path d="M104 210 L66 266 L104 258 Z"' + sk(RED, 4) + '/><path d="M196 210 L234 266 L196 258 Z"' + sk(RED, 4) + '/>' +
+      '<path d="M126 250 Q150 332 174 250 Z"' + sk(ORANGE2, 3) + '/><path d="M138 250 Q150 306 162 250 Z" fill="' + YEL + '"/>' +
+      '<path d="M150 92 Q196 150 196 236 L104 236 Q104 150 150 92 Z"' + sk(WHITEY, 5) + '/>' +
+      '<path d="M150 92 Q176 120 186 156 L114 156 Q124 120 150 92 Z"' + sk(RED, 4) + '/>' +
+      '<circle cx="150" cy="192" r="22"' + sk("#bfe3f5", 5) + '/>' +
+      '<rect x="126" y="236" width="48" height="14"' + sk("#6b7080", 3) + '/>';
+  }
+  function t15() { // flip phone
+    var s = '<rect x="96" y="100" width="108" height="112" rx="10"' + sk("#2f3a4a", 5) + '/>' +
+      '<rect x="108" y="116" width="84" height="66" rx="4"' + sk("#bfe3f5", 3) + '/>' + ln('M118 132 H170 M118 148 H150', INK, 4) +
+      ln('M130 104 H170', "#8892a6", 3) +
+      '<rect x="108" y="206" width="84" height="12"' + sk("#1c2230", 2) + '/>' +
+      '<rect x="90" y="214" width="120" height="110" rx="12"' + sk("#3b4558", 5) + '/>';
+    for (var r = 0; r < 4; r++) for (var c = 0; c < 3; c++) s += '<rect x="' + (106 + c * 30) + '" y="' + (232 + r * 22) + '" width="24" height="14" rx="6" fill="#8892a6"/>';
+    return s;
+  }
+  function t16() { // microwave
+    return '<rect x="60" y="300" width="24" height="9" fill="' + INK + '"/><rect x="216" y="300" width="24" height="9" fill="' + INK + '"/>' +
+      '<rect x="44" y="150" width="212" height="150" rx="12"' + sk("#d9dbe0", 5) + '/>' +
+      '<rect x="58" y="164" width="132" height="122" rx="8"' + sk("#3a3f4c", 4) + '/>' +
+      '<rect x="68" y="174" width="112" height="102" rx="6" fill="#1a1d26"/><rect x="68" y="174" width="112" height="102" rx="6" fill="' + YEL + '" opacity="0.18"/>' +
+      '<ellipse cx="124" cy="262" rx="40" ry="8" fill="#8892a6"/><rect x="108" y="224" width="32" height="36" rx="4"' + sk(RED, 3) + '/>' + ln('M140 234 Q156 238 140 252', RED, 5) +
+      '<rect x="198" y="164" width="48" height="122"' + sk("#bfc3ca", 3) + '/><rect x="204" y="172" width="36" height="18" fill="#14151a"/>' +
+      tx(222, 186, 13, "#7ee8a0", "0:30");
+  }
+  function t17() { // vintage car
+    return ln('M20 306 H280', INK, 5) +
+      '<path d="M80 228 L104 170 Q110 156 126 156 H186 Q202 156 210 168 L232 228 Z"' + sk(RED, 5) + '/>' +
+      '<path d="M96 222 L112 178 H148 V222 Z"' + sk("#bfe3f5", 3) + '/><path d="M158 222 V178 H188 L212 222 Z"' + sk("#bfe3f5", 3) + '/>' +
+      '<rect x="36" y="224" width="232" height="48" rx="14"' + sk(RED, 5) + '/>' +
+      '<rect x="30" y="262" width="240" height="10" rx="5"' + sk("#b8bcc6", 3) + '/>' +
+      '<circle cx="262" cy="244" r="8"' + sk(YEL, 3) + '/>' +
+      '<circle cx="88" cy="278" r="26" fill="' + INK + '"/><circle cx="88" cy="278" r="12" fill="' + CREAM + '"/><circle cx="212" cy="278" r="26" fill="' + INK + '"/><circle cx="212" cy="278" r="12" fill="' + CREAM + '"/>';
+  }
+  function t18() { // jet airliner
+    var s = ln('M24 292 H72 M44 308 H100', CREAM, 5) +
+      '<polygon points="150,192 130,160 160,160 200,190"' + sk("#b8bcc6", 4) + '/>' +
+      '<polygon points="38,190 22,128 50,128 76,186"' + sk(RED, 4) + '/>' +
+      '<ellipse cx="140" cy="200" rx="120" ry="22"' + sk(WHITEY, 5) + '/>' +
+      '<polygon points="120,206 80,262 124,262 190,208"' + sk("#d8dbe2", 4) + '/>' +
+      '<ellipse cx="132" cy="238" rx="22" ry="11"' + sk("#8892a6", 3) + '/>' +
+      ln('M40 210 H236', RED, 5) + '<polygon points="238,186 254,192 234,194" fill="#4a5160"/>';
+    for (var x = 96; x <= 224; x += 16) s += '<circle cx="' + x + '" cy="194" r="4" fill="#4a5160"/>';
+    return s;
+  }
+  function t19() { // rubber stamp
+    return '<rect x="50" y="242" width="200" height="78"' + sk(WHITEY, 4) + '/>' +
+      '<g transform="rotate(-6 150 282)"><rect x="70" y="258" width="160" height="44" fill="none" stroke="' + RED + '" stroke-width="5"/>' + tx(150, 290, 30, RED, "VERIFIED") + '</g>' +
+      '<rect x="136" y="148" width="28" height="42"' + sk(WOOD, 4) + '/><circle cx="150" cy="128" r="26"' + sk(WOOD, 4) + '/>' +
+      '<rect x="86" y="188" width="128" height="26" rx="6"' + sk("#4a3a28", 4) + '/><rect x="90" y="214" width="120" height="14" fill="#2a2e20"/>';
+  }
+  function t20() { // magnifier on a calendar
+    var s = '<rect x="66" y="106" width="168" height="196"' + sk(WHITEY, 5) + '/><rect x="66" y="106" width="168" height="34"' + sk(RED, 5) + '/>' + tx(150, 131, 22, CREAM, "DATE");
+    for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) s += '<rect x="' + (78 + c * 38) + '" y="' + (152 + r * 34) + '" width="30" height="26" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+    return s + ln('M206 280 L254 326', "#3b3320", 14) +
+      '<circle cx="172" cy="238" r="54" fill="' + CREAM + '" fill-opacity="0.55" stroke="#3b3320" stroke-width="9"/>' + tx(172, 264, 72, RED, "?");
+  }
+
+  var TSCENES = [
+    { pal: "navy",    bd: "stripes", art: t1,  war: ["TUNE IN!", "OLDER THAN YOU THINK"],   now: ["STILL ON AIR", "CLOSER TO TODAY"] },
+    { pal: "red",     bd: "stars",   art: t2,  war: ["WINNER!", "CLOSER TO V-J DAY"],        now: ["CHAMPION!", "CLOSER TO TODAY"] },
+    { pal: "char",    bd: "rays",    art: t3,  war: ["BRIGHT IDEA!", "OLDER THAN YOU THINK"], now: ["NEW IDEA!", "FRESHER THAN YOU THINK"] },
+    { pal: "sky",     bd: "checker", art: t4,  war: ["TURN A PAGE", "THE WAR WAS CLOSER"],   now: ["NEW CHAPTER", "CLOSER TO TODAY"] },
+    { pal: "mint",    bd: "checker", art: t5,  war: ["RING RING!", "CLOSER TO WWII"],       now: ["NEW CALLER", "CLOSER TO TODAY"] },
+    { pal: "lilac",   bd: "stars",   art: t6,  war: ["IT'S A WRAP", "CLOSER TO WWII"],      now: ["ACTION!", "FRESHER THAN YOU THINK"] },
+    { pal: "lilac",   bd: "dots",    art: t7,  war: ["SNACK TIME!", "CLOSER TO WWII"],       now: ["NOW SHOWING", "CLOSER TO TODAY"] },
+    { pal: "olive",   bd: "stripes", art: t8,  war: ["GAME OVER!", "CLOSER TO WWII"],       now: ["PLAYER ONE", "CLOSER TO TODAY"] },
+    { pal: "sun",     bd: "rays",    art: t9,  war: ["SAVE IT!", "OLDER THAN IT FEELS"],    now: ["NEW GAME", "BARELY OLD AT ALL"] },
+    { pal: "red",     bd: "dots",    art: t10, war: ["SMILE!", "CLOSER TO THE WAR"],        now: ["SNAPSHOT", "CLOSER TO TODAY"] },
+    { pal: "char",    bd: "dots",    art: t11, war: ["LOADING...", "TIME FLIES, FRIEND"],   now: ["ONLINE", "CLOSER TO TODAY"] },
+    { pal: "navy",    bd: "rays",    art: t12, war: ["EXTRA!", "OLDER THAN YOU THINK"],     now: ["BREAKING!", "NOT THAT OLD"] },
+    { pal: "navy",    bd: "stars",   art: t13, war: ["TICK TOCK!", "CLOSER TO 1945"],       now: ["ON TIME", "CLOSER TO TODAY"] },
+    { pal: "char",    bd: "stars",   art: t14, war: ["BLAST OFF!", "CLOSER TO WWII"],       now: ["LIFTOFF!", "CLOSER TO TODAY"] },
+    { pal: "sun",     bd: "checker", art: t15, war: ["FLIP IT!", "THE WAR WAS CLOSER"],     now: ["NEW MODEL", "CLOSER TO TODAY"] },
+    { pal: "pink",    bd: "stripes", art: t16, war: ["DING!", "CLOSER TO V-J DAY"],         now: ["HOT TAKE", "FRESHER THAN YOU THINK"] },
+    { pal: "sky",     bd: "rays",    art: t17, war: ["ROAD TRIP!", "CLOSER TO WWII"],       now: ["NEW MODEL", "CLOSER TO TODAY"] },
+    { pal: "sky",     bd: "dots",    art: t18, war: ["TAKEOFF!", "CLOSER TO WWII"],         now: ["LANDED", "CLOSER TO TODAY"] },
+    { pal: "sun",     bd: "checker", art: t19, war: ["VERIFIED!", "CLOSER TO WWII"],        now: ["VERIFIED!", "CLOSER TO TODAY"] },
+    { pal: "mint",    bd: "dots",    art: t20, war: ["DO THE MATH", "CLOSER TO WWII"],      now: ["DO THE MATH", "CLOSER TO TODAY"] }
+  ];
+
+  var lastT = -1;
+  function thingPosterSVG(closerToWar) {
+    var i;
+    do { i = Math.floor(Math.random() * TSCENES.length); } while (i === lastT && TSCENES.length > 1);
+    lastT = i;
+    var s = TSCENES[i], c = closerToWar ? s.war : s.now;
+    return buildScene({ pal: s.pal, bd: s.bd, art: s.art, top: c[0], bottom: c[1] });
+  }
+
   var lastScene = -1;
   function posterSVG() {
     var i;
@@ -772,12 +1074,12 @@ figure { margin: 0; }
     return buildScene(SCENES[i]);
   }
 
-  function render(birthMs) {
+  function render(birthMs, prec) {
     var r = judge(birthMs, now);
     var when = r.beforeWar ? yrs(r.daysToWar) + " years before V-J Day" : yrs(r.daysToWar) + " years after V-J Day";
     var math =
       '<div class="math">' +
-      '<span>Born: <b>' + fmtDate(birthMs) + '</b></span>' +
+      '<span>Born: <b>' + esc(fmtDate(birthMs) + (prec === "year" ? " (year only, so we used July 1)" : prec === "month" ? " (month only, so we used the 15th)" : "")) + '</b></span>' +
       '<span>Distance to V-J Day (2 Sep 1945): <b>' + yrs(r.daysToWar) + ' yrs</b> (' + (r.beforeWar ? "before" : "after") + ')</span>' +
       '<span>Distance to today: <b>' + yrs(r.daysToNow) + ' yrs</b></span>' +
       '</div>';
@@ -785,42 +1087,418 @@ figure { margin: 0; }
     if (r.closerToWar) {
       var q = QUIPS[Math.floor(Math.random() * QUIPS.length)];
       html =
-        '<figure class="poster-wrap">' + posterSVG() +
+        '<figure class="poster-wrap">' + keepSvg(posterSVG()) +
         '<figcaption>Original illustration in the style of 1940s posters. Reload for a new one.</figcaption></figure>' +
         '<div class="verdict"><span class="stamp">Closer to the war</span>' +
-        '<h2>You are old.</h2><p>' + q + '</p>' + math + '</div>';
+        '<h2>You are old.</h2><p>' + q + '</p>' + math + SHARE_BTN + '</div>';
     } else {
       var yq = YQUIPS[Math.floor(Math.random() * YQUIPS.length)];
       html =
-        '<figure class="poster-wrap">' + youngPosterSVG() +
+        '<figure class="poster-wrap">' + keepSvg(youngPosterSVG()) +
         '<figcaption>Original illustration. Reload for a new one.</figcaption></figure>' +
         '<div class="verdict"><span class="stamp young">Closer to today</span>' +
         '<h2>Sorry, young whippersnapper.</h2>' +
-        '<p>' + yq + '</p>' + math + '</div>';
+        '<p>' + yq + '</p>' + math + SHARE_BTN + '</div>';
     }
+    last = {
+      war: r.closerToWar,
+      stamp: r.closerToWar ? "Closer to the war" : "Closer to today",
+      head: r.closerToWar ? "You are old." : "Sorry, young whippersnapper.",
+      sub: "Born in " + new Date(birthMs).getUTCFullYear() + ", closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
+      dist: distLine(r),
+      cta: "Are you officially old?"
+    };
     document.getElementById("result").innerHTML = html;
+    paintSound();
 
     var y = document.getElementById("you");
     y.hidden = false;
     y.style.left = Math.max(2, Math.min(98, pct(birthMs))) + "%";
   }
 
-  document.getElementById("f").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var err = document.getElementById("err");
-    var v = document.getElementById("dob").value;
+  function $(id) { return document.getElementById(id); }
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  var MONTHS = { jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3, apr: 4, april: 4, may: 5, jun: 6, june: 6, jul: 7, july: 7, aug: 8, august: 8, sep: 9, sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11, dec: 12, december: 12 };
+  function mk(y, m, d) {
+    var dt = new Date(0);
+    dt.setUTCFullYear(y, m - 1, d);
+    dt.setUTCHours(0, 0, 0, 0);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return null;
+    return dt.getTime();
+  }
+  // Accepts 1981, 8/1981, 1981-08, 8/1/1981, 1981-08-01, "Aug 1, 1981", "August 1981", "1 Aug 1981".
+  function parseLoose(str) {
+    var s = String(str).trim().replace(/\s+/g, " "), m, y, mo = 0, d = 0;
+    if ((m = /^(\d{3,4})$/.exec(s))) { y = +m[1]; }
+    else if ((m = /^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/.exec(s))) { y = +m[1]; mo = +m[2]; d = +(m[3] || 0); }
+    else if ((m = /^(\d{1,2})\/(\d{4})$/.exec(s))) { mo = +m[1]; y = +m[2]; }
+    else if ((m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s))) { mo = +m[1]; d = +m[2]; y = +m[3]; }
+    else if ((m = /^([A-Za-z]{3,9})\.? (?:(\d{1,2})(?:st|nd|rd|th)?,? )?(\d{4})$/.exec(s))) { mo = MONTHS[m[1].toLowerCase()] || 0; if (!mo) return null; d = +(m[2] || 0); y = +m[3]; }
+    else if ((m = /^(\d{1,2}) ([A-Za-z]{3,9})\.?,? (\d{4})$/.exec(s))) { mo = MONTHS[m[2].toLowerCase()] || 0; if (!mo) return null; d = +m[1]; y = +m[3]; }
+    else return null;
+    if (!(y >= 1) || (mo && (mo < 1 || mo > 12))) return null;
+    var ms = mk(y, mo || 7, d || (mo ? 15 : 1));
+    if (ms === null) return null;
+    return { ms: ms, prec: d ? "day" : mo ? "month" : "year", y: y, mo: mo };
+  }
+
+  var WAR_HEADS = ["Plot twist.", "Brace yourself.", "Time flies."];
+  var NOW_HEADS = ["Not that old.", "Still fresh.", "Relax, it is modern."];
+
+  function renderThing(ms, name, prec) {
+    var r = judge(ms, now), year = new Date(ms).getUTCFullYear();
+    var headTxt = r.closerToWar ? pick(WAR_HEADS) : pick(NOW_HEADS);
+    var subject = name ? "<b>" + esc(name) + "</b> (" + year + ")" : "That date";
+    var used = fmtDate(ms) + (prec === "year" ? " (year only, so we used July 1)" : prec === "month" ? " (month only, so we used the 15th)" : "");
+    var math =
+      '<div class="math">' +
+      '<span>Date used: <b>' + esc(used) + '</b></span>' +
+      '<span>Distance to V-J Day (2 Sep 1945): <b>' + yrs(r.daysToWar) + ' yrs</b> (' + (r.beforeWar ? "before" : "after") + ')</span>' +
+      '<span>Distance to today: <b>' + yrs(r.daysToNow) + ' yrs</b></span>' +
+      '</div>';
+    var html =
+      '<figure class="poster-wrap">' + keepSvg(thingPosterSVG(r.closerToWar)) +
+      '<figcaption>Original illustration. Reload for a new one.</figcaption></figure>' +
+      '<div class="verdict"><span class="stamp' + (r.closerToWar ? '' : ' young') + '">' + (r.closerToWar ? "Closer to the war" : "Closer to today") + '</span>' +
+      '<h2>' + headTxt + '</h2>' +
+      '<p>' + subject + ' is closer to ' + (r.closerToWar ? 'the end of WWII than to today.' : 'today than to the end of WWII.') + '</p>' + math + SHARE_BTN + '</div>';
+    last = {
+      war: r.closerToWar,
+      stamp: r.closerToWar ? "Closer to the war" : "Closer to today",
+      head: headTxt,
+      sub: (name ? name + " (" + year + ")" : "That date") + " is closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
+      dist: distLine(r),
+      cta: "Check yours:"
+    };
+    $("result").innerHTML = html;
+    paintSound();
+    var y = $("you");
+    y.hidden = false;
+    y.style.left = Math.max(2, Math.min(98, pct(ms))) + "%";
+  }
+
+  var mode = "person";
+  var COPY = {
+    person: { lede: "Enter your year or date of birth. We measure whether you were born closer to the end of World War II or to today.", btn: "Report in",
+              note: "Born before " + fmtDate(mid) + "? You are closer to the war. Born after? You are closer to today." },
+    thing:  { lede: "Enter the year or date something happened. We measure whether it landed closer to the end of World War II or to today.", btn: "Check it",
+              note: "Anything dated before " + fmtDate(mid) + " is closer to the war. Anything after is closer to today." }
+  };
+  function setMode(m) {
+    mode = m;
+    $("fields-person").hidden = m !== "person";
+    $("fields-thing").hidden = m !== "thing";
+    $("chips").hidden = m !== "thing";
+    $("lede").textContent = COPY[m].lede;
+    $("go").textContent = COPY[m].btn;
+    $("tl-note").textContent = COPY[m].note;
+    $("you").hidden = true;
+    $("you").querySelector("span").textContent = m === "person" ? "YOU" : "HERE";
+    $("result").innerHTML = "";
+    $("err").textContent = "";
+    var labels = document.querySelectorAll(".mode label");
+    for (var i = 0; i < labels.length; i++) labels[i].className = labels[i].querySelector("input").checked ? "on" : "";
+  }
+
+  function clampToday(parsed, err, msg) {
+    var t = parsed.ms;
+    if (t > now) {
+      var nd = new Date(now), ny = nd.getUTCFullYear();
+      if ((parsed.prec === "year" && parsed.y === ny) || (parsed.prec === "month" && parsed.y === ny && parsed.mo === nd.getUTCMonth() + 1)) return now;
+      err.textContent = msg;
+      return null;
+    }
+    return t;
+  }
+
+  function submitForm() {
+    var err = $("err");
     err.textContent = "";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { err.textContent = "Enter a full date of birth."; return; }
-    var p = v.split("-");
-    var ms = Date.UTC(+p[0], +p[1] - 1, +p[2]);
-    if (isNaN(ms) || +p[0] < 1880) { err.textContent = "That date is not in range. Try again."; return; }
-    if (ms > now) { err.textContent = "That date is in the future. Enter your actual birthday."; return; }
-    render(ms);
+    if (mode === "person") {
+      var pp = parseLoose($("dob").value);
+      if (!pp) { err.textContent = "Enter a year (1975) or a full date (3/2/1975)."; return; }
+      if (pp.y < 1880) { err.textContent = "That year is not in range. Try again."; return; }
+      var bt = clampToday(pp, err, "That date is in the future. Enter your actual birth year or date.");
+      if (bt === null) return;
+      render(bt, pp.prec);
+      return;
+    }
+    var parsed = parseLoose($("when").value);
+    if (!parsed) { err.textContent = "Enter a year (1981), a month and year (8/1981), or a full date (8/1/1981)."; return; }
+    var t = clampToday(parsed, err, "That date is in the future. Enter something that has already happened.");
+    if (t === null) return;
+    renderThing(t, $("thing").value.trim(), parsed.prec);
+  }
+
+  $("f").addEventListener("submit", function (e) { e.preventDefault(); submitForm(); });
+  var radios = document.querySelectorAll('.mode input[name="mode"]');
+  for (var ri = 0; ri < radios.length; ri++) radios[ri].addEventListener("change", function () { setMode(this.value); });
+  var chips = document.querySelectorAll(".chip");
+  for (var ci = 0; ci < chips.length; ci++) chips[ci].addEventListener("click", function () {
+    $("thing").value = this.getAttribute("data-name");
+    $("when").value = this.getAttribute("data-when");
+    submitForm();
   });
 
-  var d = new Date();
-  var todayStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  document.getElementById("dob").max = todayStr;
+
+  // ---- sound begin
+  var AC = window.AudioContext || window.webkitAudioContext, actx = null, noiseBuf = null;
+  function audio() {
+    if (!AC) return null;
+    try { if (!actx) actx = new AC(); if (actx.state === "suspended") actx.resume(); } catch (e) { return null; }
+    return actx;
+  }
+  function noise(c) {
+    if (!noiseBuf || noiseBuf.sampleRate !== c.sampleRate) {
+      noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.3), c.sampleRate);
+      var d = noiseBuf.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return noiseBuf;
+  }
+  function burst(c, out, t, o) {
+    var src = c.createBufferSource(); src.buffer = noise(c);
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = o.freq; f.Q.value = o.q || 1;
+    var g = c.createGain(); g.gain.setValueAtTime(o.gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + o.dur);
+    src.connect(f); f.connect(g); g.connect(out);
+    src.start(t, Math.random() * 0.1); src.stop(t + o.dur + 0.02);
+  }
+  function tone(c, out, t, o) {
+    var os = c.createOscillator(); os.type = o.type || "sine"; os.frequency.setValueAtTime(o.f0, t);
+    if (o.f1) os.frequency.exponentialRampToValueAtTime(o.f1, t + o.dur);
+    var g = c.createGain(); g.gain.setValueAtTime(o.gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + o.dur);
+    os.connect(g); g.connect(out);
+    os.start(t); os.stop(t + o.dur + 0.02);
+  }
+  function playTypewriter(c, out, t0) {
+    var t = t0, i;
+    for (i = 0; i < 16; i++) {
+      burst(c, out, t, { freq: 2200, q: 1.1, gain: 0.55, dur: 0.045 });
+      burst(c, out, t + 0.012, { freq: 4200, q: 3, gain: 0.25, dur: 0.03 });
+      tone(c, out, t, { f0: 150, f1: 70, gain: 0.5, dur: 0.07 });
+      t += 0.075 + Math.random() * 0.09 + (i % 5 === 4 ? 0.08 : 0);
+    }
+    burst(c, out, t + 0.05, { freq: 900, q: 0.8, gain: 0.7, dur: 0.12 });
+    tone(c, out, t + 0.12, { f0: 2350, gain: 0.25, dur: 1.1 });
+    tone(c, out, t + 0.12, { f0: 3520, gain: 0.12, dur: 0.8 });
+    return t + 1.3;
+  }
+  function sweepNoise(c, out, t, o) {
+    var src = c.createBufferSource(); src.buffer = noise(c); src.loop = true;
+    var f = c.createBiquadFilter(); f.type = o.type || "bandpass"; f.Q.value = o.q || 1;
+    f.frequency.setValueAtTime(o.f0, t); f.frequency.exponentialRampToValueAtTime(o.f1, t + o.dur);
+    var g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(o.gain, t + 0.03); g.gain.setValueAtTime(o.gain, t + o.dur - 0.05); g.gain.linearRampToValueAtTime(0.0001, t + o.dur);
+    src.connect(f); f.connect(g); g.connect(out);
+    src.start(t); src.stop(t + o.dur + 0.02);
+  }
+  function buzz(c, out, t, o) {
+    var os = c.createOscillator(); os.type = "sawtooth";
+    os.frequency.setValueAtTime(o.f0, t); os.frequency.linearRampToValueAtTime(o.f1, t + o.dur);
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1500; f.Q.value = 1.5;
+    var g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(o.gain, t + 0.02); g.gain.setValueAtTime(o.gain, t + o.dur - 0.03); g.gain.linearRampToValueAtTime(0.0001, t + o.dur);
+    os.connect(f); f.connect(g); g.connect(out);
+    os.start(t); os.stop(t + o.dur + 0.02);
+  }
+  function playPrinter(c, out, t0) {
+    var t = t0, i;
+    tone(c, out, t, { type: "triangle", f0: 70, f1: 150, gain: 0.25, dur: 0.3 });
+    t += 0.3;
+    for (i = 0; i < 5; i++) {
+      var left = i % 2 === 0;
+      buzz(c, out, t, { f0: left ? 190 : 300, f1: left ? 300 : 190, gain: 0.13, dur: 0.26 });
+      sweepNoise(c, out, t, { f0: 2400, f1: 3200, q: 2, gain: 0.07, dur: 0.26 });
+      t += 0.26;
+      burst(c, out, t + 0.01, { freq: 700, q: 0.8, gain: 0.3, dur: 0.06 });
+      tone(c, out, t + 0.01, { f0: 120, f1: 80, gain: 0.25, dur: 0.07 });
+      t += 0.09;
+    }
+    sweepNoise(c, out, t, { type: "highpass", f0: 600, f1: 2600, q: 0.7, gain: 0.12, dur: 0.4 });
+    burst(c, out, t + 0.42, { freq: 800, q: 0.8, gain: 0.4, dur: 0.07 });
+    tone(c, out, t + 0.42, { f0: 130, f1: 70, gain: 0.35, dur: 0.1 });
+    return t + 0.6;
+  }
+  // ---- sound end
+
+  var soundOn = true;
+  try { if (window.localStorage.getItem("oldInspectorSound") === "off") soundOn = false; } catch (e) {}
+  function paintSound() {
+    var b = $("snd");
+    if (!b) return;
+    b.textContent = "Sound: " + (soundOn ? "on" : "off");
+    b.setAttribute("aria-pressed", soundOn ? "true" : "false");
+  }
+  function playSound(closerToWar) {
+    if (!soundOn) return;
+    var c = audio();
+    if (!c) return;
+    try {
+      var out = c.createGain(); out.gain.value = closerToWar ? 0.35 : 0.6; out.connect(c.destination);
+      (closerToWar ? playTypewriter : playPrinter)(c, out, c.currentTime + 0.05);
+    } catch (e) {}
+  }
+  $("result").addEventListener("click", function (e) {
+    var tg = e.target.closest ? e.target.closest("#snd") : null;
+    if (!tg) return;
+    soundOn = !soundOn;
+    try { window.localStorage.setItem("oldInspectorSound", soundOn ? "on" : "off"); } catch (e) {}
+    paintSound();
+    if (soundOn) audio();
+  });
+
+  // ---- share image
+  var SHARE_BTN = '<div class="shareRow"><button type="button" class="share" id="share">Share this result</button><button type="button" class="chip" id="snd" aria-pressed="true">Sound: on</button></div>';
+  var last = null, lastSvg = "";
+  function keepSvg(t) { lastSvg = t; return t; }
+  function distLine(r) {
+    return yrs(r.daysToWar) + " yrs " + (r.beforeWar ? "before" : "after") + " V-J Day  |  " + yrs(r.daysToNow) + " yrs before today";
+  }
+  function shareUrl() {
+    var h = window.location.hostname || "";
+    if (!h || window.location.protocol === "file:" || /claude|anthropic|localhost|^127\./i.test(h)) return "CollegeTowns.org";
+    return h + window.location.pathname.replace(/index\.html$/, "").replace(/\/$/, "");
+  }
+  function loadImg(src) {
+    return new Promise(function (res, rej) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = rej; im.src = src; });
+  }
+  function fitFont(g, text, weight, family, startPx, maxW) {
+    var px = startPx;
+    g.font = weight + " " + px + "px " + family;
+    while (px > 20 && g.measureText(text).width > maxW) { px -= 2; g.font = weight + " " + px + "px " + family; }
+    return px;
+  }
+  function wrapLines(g, text, maxW) {
+    var words = text.split(" "), line = "", out = [];
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + " " + words[i] : words[i];
+      if (g.measureText(test).width > maxW && line) { out.push(line); line = words[i]; } else line = test;
+    }
+    if (line) out.push(line);
+    return out;
+  }
+  function drawCard() {
+    var DISPLAY = '"Stardos Stencil", Impact, "Arial Black", sans-serif';
+    var BODY = '"Barlow Condensed", "Arial Narrow", Arial, sans-serif';
+    var MONO = '"IBM Plex Mono", "Courier New", monospace';
+    var INKC = "#23271c", MUTED = "#5d6148", PAPER = "#ece6d2";
+    var fonts = (document.fonts && document.fonts.load)
+      ? Promise.all([document.fonts.load('700 56px "Stardos Stencil"'), document.fonts.load('500 36px "Barlow Condensed"'), document.fonts.load('600 24px "IBM Plex Mono"')]).catch(function () {})
+      : Promise.resolve();
+    var svg = lastSvg
+      .replace(/<svg /, '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" ')
+      .replace(/font-family:var\(--font-display\)/g, "font-family:Impact,'Arial Black',Arial,sans-serif;font-weight:700");
+    var imgP = loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg));
+    return Promise.all([imgP, fonts]).then(function (parts) {
+      var img = parts[0], W = 1080, H = 1350;
+      var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+      var g = cv.getContext("2d");
+      g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
+      g.strokeStyle = INKC; g.lineWidth = 8; g.strokeRect(28, 28, W - 56, H - 56);
+      g.textBaseline = "alphabetic"; g.textAlign = "left";
+      g.fillStyle = INKC;
+      fitFont(g, "ARE YOU OFFICIALLY OLD?", 700, DISPLAY, 64, W - 128);
+      g.fillText("ARE YOU OFFICIALLY OLD?", 64, 122);
+      g.fillStyle = MUTED; g.font = "600 24px " + MONO;
+      g.fillText("AGE INSPECTION BY COLLEGE TOWNS", 64, 164);
+      var pw = 570, ph = 760, px = (W - pw) / 2, py = 190;
+      g.drawImage(img, px, py, pw, ph);
+      g.strokeStyle = INKC; g.lineWidth = 6; g.strokeRect(px, py, pw, ph);
+      var accent = last.war ? "#b3261e" : "#4a5230";
+      g.save();
+      g.translate(64, 1012); g.rotate(-0.035);
+      g.font = "700 34px " + DISPLAY;
+      var stampText = last.stamp.toUpperCase(), sw = g.measureText(stampText).width;
+      g.strokeStyle = accent; g.lineWidth = 4; g.strokeRect(-12, -36, sw + 24, 50);
+      g.fillStyle = accent; g.fillText(stampText, 0, 0);
+      g.restore();
+      var head = last.head.toUpperCase();
+      g.fillStyle = INKC;
+      fitFont(g, head, 700, DISPLAY, 76, W - 128);
+      g.fillText(head, 64, 1094);
+      g.fillStyle = INKC; g.font = "500 38px " + BODY;
+      var lines = wrapLines(g, last.sub, W - 128).slice(0, 2);
+      for (var i = 0; i < lines.length; i++) g.fillText(lines[i], 64, 1146 + i * 44);
+      g.fillStyle = MUTED; g.font = "600 24px " + MONO;
+      g.fillText(last.dist, 64, 1146 + lines.length * 44 + 14);
+      g.fillStyle = INKC; g.font = "600 28px " + MONO;
+      g.fillText(shareUrl(), 64, 1278);
+      g.fillStyle = MUTED; g.font = "500 20px " + MONO;
+      g.fillText("Part of the 1941 Project on CollegeTowns.org", 64, 1304);
+      return cv;
+    });
+  }
+
+  var opener = null;
+  function showOverlay(url) {
+    opener = document.activeElement;
+    $("ov-img").src = url;
+    $("ov-dl").href = url;
+    $("ov-text").value = last.caption;
+    $("ov-msg").textContent = "";
+    $("overlay").hidden = false;
+    $("ov-close").focus();
+  }
+  function hideOverlay() {
+    $("overlay").hidden = true;
+    $("ov-img").removeAttribute("src");
+    try { if (opener && opener.focus) opener.focus(); } catch (e) {}
+  }
+  $("ov-close").addEventListener("click", hideOverlay);
+  $("overlay").addEventListener("click", function (e) { if (e.target === this) hideOverlay(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("overlay").hidden) hideOverlay(); });
+  $("ov-copy").addEventListener("click", function () {
+    var ta = $("ov-text"), msg = $("ov-msg");
+    function manual() { ta.focus(); ta.select(); msg.textContent = "Caption selected. Copy it with your keyboard or menu."; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try { navigator.clipboard.writeText(ta.value).then(function () { msg.textContent = "Caption copied."; }, manual); } catch (e) { manual(); }
+    } else manual();
+  });
+
+  function startShare(btn) {
+    if (!last || !lastSvg) return;
+    last.caption = last.sub + " " + last.cta + " " + shareUrl();
+    playSound(last.war);
+    btn.disabled = true; btn.textContent = "Making image...";
+    function done() { btn.disabled = false; btn.textContent = "Share this result"; }
+    drawCard().then(function (cv) {
+      var dataUrl = cv.toDataURL("image/png");
+      return new Promise(function (res) { cv.toBlob(function (blob) { res({ url: dataUrl, blob: blob }); }, "image/png"); });
+    }).then(function (o) {
+      done();
+      var file = null;
+      try { file = new File([o.blob], "are-you-officially-old.png", { type: "image/png" }); } catch (e) {}
+      if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], text: last.caption }).catch(function (e) { if (!e || e.name !== "AbortError") showOverlay(o.url); });
+        return;
+      }
+      showOverlay(o.url);
+    }).catch(function () {
+      done();
+      $("err").textContent = "Could not make the image. Try again.";
+    });
+  }
+  $("result").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("#share") : null;
+    if (b) startShare(b);
+  });
+
+  // Scroll cue: shows a down arrow while there is more page below the fold.
+  var more = $("more");
+  function updateMore() {
+    var left = document.documentElement.scrollHeight - (window.pageYOffset + window.innerHeight);
+    more.hidden = left < 48;
+  }
+  window.addEventListener("scroll", updateMore, { passive: true });
+  window.addEventListener("resize", updateMore);
+  if (window.ResizeObserver) new ResizeObserver(updateMore).observe(document.body);
+  more.addEventListener("click", function () {
+    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollBy({ top: Math.round(window.innerHeight * 0.8), behavior: calm ? "auto" : "smooth" });
+  });
+  updateMore();
 })();
 </script>
 
