@@ -111,10 +111,12 @@ input::placeholder { color: var(--muted); opacity: 0.7; }
 .btnlink { display: inline-block; font: 500 0.95rem var(--font-body); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); padding: 0.3rem 0.8rem; text-decoration: none; }
 .btnlink:hover { background: var(--mustard); }
 .btnlink:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
-.more { position: fixed; left: calc(50% - 22px); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 5; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--red); }
-.more:hover { box-shadow: 4px 4px 0 var(--red); }
-.more:active { box-shadow: 1px 1px 0 var(--red); }
-.more svg { width: 22px; height: 22px; display: block; }
+.more { position: fixed; left: calc(10px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5; width: 58px; height: 84px; padding: 0; display: grid; place-items: center; background: none; border: 0; box-shadow: none; color: var(--red); cursor: pointer; }
+.more svg { width: 58px; height: 84px; display: block; overflow: visible; filter: drop-shadow(3px 3px 0 var(--ink)); }
+.more:hover, .more:active { transform: none; box-shadow: none; background: none; }
+.more:hover svg { filter: drop-shadow(4px 4px 0 var(--ink)); }
+.more:active svg { filter: drop-shadow(1px 1px 0 var(--ink)); }
+.more:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) {
   .more svg { animation: nudge 1.4s ease-in-out infinite; }
   @keyframes nudge { 0%, 100% { transform: translateY(-2px); } 50% { transform: translateY(3px); } }
@@ -227,10 +229,11 @@ figure { margin: 0; }
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="ov-title" hidden>
   <div class="sheet">
-    <h3 id="ov-title">Your share image</h3>
+    <h3 id="ov-title">Your printout</h3>
     <img id="ov-img" alt="Share image with your result">
-    <p class="hint">On a phone, press and hold the image to save it. On a computer, use Download or right-click the image.</p>
+    <p class="hint" id="ov-hint">On a phone, press and hold the image to save it. On a computer, use Download or right-click the image.</p>
     <div class="actions">
+      <button type="button" class="share" id="ov-share" hidden>Share</button>
       <a class="btnlink" id="ov-dl" download="are-you-officially-old.png" href="#">Download image</a>
       <button type="button" class="chip" id="ov-copy">Copy caption</button>
       <button type="button" class="chip" id="ov-close">Close</button>
@@ -241,7 +244,7 @@ figure { margin: 0; }
 </div>
 
 <button type="button" class="more" id="more" aria-label="Scroll down for more" hidden>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="square" aria-hidden="true"><path d="M12 4v15M5 13l7 7 7-7"/></svg>
+  <svg viewBox="0 0 58 84" aria-hidden="true"><g transform="rotate(-14 29 42)"><path fill="currentColor" d="M17 0 L39 0 L39 40 L58 40 L26 84 L0 40 L17 40 Z"/></g></svg>
 </button>
 
 <script>
@@ -1431,17 +1434,33 @@ figure { margin: 0; }
     });
   }
 
-  var opener = null;
-  function showOverlay(url) {
+  var opener = null, shareFile = null, shareTok = 0;
+  function showOverlay() {
     opener = document.activeElement;
-    $("ov-img").src = url;
-    $("ov-dl").href = url;
+    $("ov-img").removeAttribute("src");
+    $("ov-img").style.visibility = "hidden";
+    $("ov-dl").removeAttribute("href");
+    $("ov-dl").hidden = true;
+    $("ov-share").hidden = true;
     $("ov-text").value = last.caption;
-    $("ov-msg").textContent = "";
+    $("ov-msg").textContent = "Printing your poster...";
     $("overlay").hidden = false;
     $("ov-close").focus();
   }
+  function fillOverlay(url, file) {
+    shareFile = file;
+    $("ov-img").src = url;
+    $("ov-img").style.visibility = "visible";
+    $("ov-dl").href = url;
+    $("ov-dl").hidden = false;
+    $("ov-msg").textContent = "";
+    var can = false;
+    try { can = !!(file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) {}
+    $("ov-share").hidden = !can;
+    if (can) $("ov-share").focus();
+  }
   function hideOverlay() {
+    shareTok++;
     $("overlay").hidden = true;
     $("ov-img").removeAttribute("src");
     try { if (opener && opener.focus) opener.focus(); } catch (e) {}
@@ -1457,27 +1476,32 @@ figure { margin: 0; }
     } else manual();
   });
 
+  $("ov-share").addEventListener("click", function () {
+    if (!shareFile) return;
+    try {
+      navigator.share({ files: [shareFile], text: last.caption }).catch(function (e) {
+        if (e && e.name !== "AbortError") $("ov-msg").textContent = "Sharing did not work here. Save the image and post it yourself.";
+      });
+    } catch (e) { $("ov-msg").textContent = "Sharing did not work here. Save the image and post it yourself."; }
+  });
+
   function startShare(btn) {
     if (!last || !lastSvg) return;
     last.caption = last.sub + " " + last.cta + " " + shareUrl();
     playSound(last.war);
-    btn.disabled = true; btn.textContent = "Making image...";
-    function done() { btn.disabled = false; btn.textContent = "Share this result"; }
+    var tok = ++shareTok;
+    showOverlay();
     drawCard().then(function (cv) {
       var dataUrl = cv.toDataURL("image/png");
       return new Promise(function (res) { cv.toBlob(function (blob) { res({ url: dataUrl, blob: blob }); }, "image/png"); });
     }).then(function (o) {
-      done();
+      if (tok !== shareTok) return;
       var file = null;
       try { file = new File([o.blob], "are-you-officially-old.png", { type: "image/png" }); } catch (e) {}
-      if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], text: last.caption }).catch(function (e) { if (!e || e.name !== "AbortError") showOverlay(o.url); });
-        return;
-      }
-      showOverlay(o.url);
+      fillOverlay(o.url, file);
     }).catch(function () {
-      done();
-      $("err").textContent = "Could not make the image. Try again.";
+      if (tok !== shareTok) return;
+      $("ov-msg").textContent = "Could not make the image. Close this and try again.";
     });
   }
   $("result").addEventListener("click", function (e) {
