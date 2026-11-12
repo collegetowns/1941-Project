@@ -10,19 +10,19 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The 1941 Project, by College Towns">
-<meta property="og:title" content="Are You Officially Old?">
+<meta property="og:title" content="Officially Old?">
 <meta property="og:description" content="Is your birthday, or your favorite movie, closer to the end of WWII or to today? Find out.">
 <meta property="og:url" content="https://1941project.collegetowns.org/">
 <meta property="og:image" content="https://1941project.collegetowns.org/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Are You Officially Old? A drill-sergeant inspector poster reading Spotted! One Old Maggot.">
+<meta property="og:image:alt" content="Officially Old? A drill-sergeant inspector poster reading Spotted! One Old Maggot.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Are You Officially Old?">
+<meta name="twitter:title" content="Officially Old?">
 <meta name="twitter:description" content="Is your birthday, or your favorite movie, closer to the end of WWII or to today? Find out.">
 <meta name="twitter:image" content="https://1941project.collegetowns.org/og-image.png">
 <style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Are You Officially Old?</title>
+<title>Officially Old?</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;500;700&family=IBM+Plex+Mono:wght@400;600&family=Stardos+Stencil:wght@700&display=swap">
 <style>
@@ -193,7 +193,7 @@ figure { margin: 0; }
 <main class="wrap">
   <header class="mast">
     <div class="form-no">Age inspection by <a href="https://collegetowns.org" target="_blank" rel="noopener">College Towns</a></div>
-    <h1>Are You Officially Old?</h1>
+    <h1>Officially Old?</h1>
     <p class="lede" id="lede">Enter your year or date of birth. We measure whether you were born closer to the end of World War II or to today.</p>
   </header>
 
@@ -1244,7 +1244,7 @@ figure { margin: 0; }
       head: r.inWar ? "Born in the war, soldier." : r.closerToWar ? "You are old." : "Sorry, young whippersnapper.",
       sub: r.inWar ? "Born in " + new Date(birthMs).getUTCFullYear() + ", during WWII." : "Born in " + new Date(birthMs).getUTCFullYear() + ", closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
       dist: distLine(r),
-      cta: "Are you officially old?"
+      cta: "Officially old?"
     };
     document.getElementById("result").innerHTML = html;
 
@@ -1450,8 +1450,8 @@ figure { margin: 0; }
       g.strokeStyle = INKC; g.lineWidth = 8; g.strokeRect(28, 28, W - 56, H - 56);
       g.textBaseline = "alphabetic"; g.textAlign = "left";
       g.fillStyle = INKC;
-      fitFont(g, "ARE YOU OFFICIALLY OLD?", 700, DISPLAY, 64, W - 128);
-      g.fillText("ARE YOU OFFICIALLY OLD?", 64, 122);
+      fitFont(g, "OFFICIALLY OLD?", 700, DISPLAY, 64, W - 128);
+      g.fillText("OFFICIALLY OLD?", 64, 122);
       g.fillStyle = MUTED; g.font = "600 24px " + MONO;
       g.fillText("AGE INSPECTION BY COLLEGE TOWNS", 64, 164);
       var pw = 570, ph = 760, px = (W - pw) / 2, py = 190;
