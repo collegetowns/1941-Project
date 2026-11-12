@@ -151,9 +151,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--mustard); o
 
 .timeline { background: var(--card); border: 2px solid var(--ink); padding: 0.6rem 0.8rem 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .tl-head { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
-.track-area { position: relative; height: 4.6rem; margin-inline: 0.5rem; }
+.track-area { position: relative; height: 5.6rem; margin-inline: 0.5rem; }
 .track { position: absolute; left: 0; right: 0; top: 1.7rem; height: 8px; background: var(--line); }
 .zone-war { position: absolute; top: 1.7rem; height: 8px; background: var(--olive); }
+.zone-in { position: absolute; top: 1.7rem; height: 8px; background: var(--red); }
+.tick.long { height: 3.1rem; }
 .zone-now { position: absolute; top: 1.7rem; height: 8px; background: var(--mustard); }
 .tick { position: absolute; width: 2px; background: var(--ink); top: 1.4rem; height: 1.3rem; }
 .tl-label { position: absolute; top: 2.85rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.64rem; line-height: 1.25; text-align: center; white-space: pre; }
@@ -229,15 +231,18 @@ figure { margin: 0; }
   </div>
   <p class="err" id="err" role="alert"></p>
 
-  <section class="timeline" aria-label="Timeline from the end of World War II to today">
+  <section class="timeline" aria-label="Timeline from 1941 through the end of World War II to today">
     <div class="tl-head">Distance chart · World War II to Today</div>
     <div class="track-area" id="tl">
       <div class="track"></div>
+      <div class="zone-in" id="zi"></div>
       <div class="zone-war" id="zw"></div>
       <div class="zone-now" id="zn"></div>
+      <div class="tick long" id="t-start"></div>
       <div class="tick" id="t-war"></div>
       <div class="tick" id="t-mid"></div>
       <div class="tick" id="t-now" style="width:3px"></div>
+      <div class="tl-label left" id="l-start" style="top:4.55rem"></div>
       <div class="tl-label left" id="l-war"></div>
       <div class="tl-label" id="l-mid"></div>
       <div class="tl-label right" id="l-now"></div>
@@ -275,7 +280,8 @@ figure { margin: 0; }
 (function () {
   var WAR_END = Date.UTC(1945, 8, 2); // formal Japanese surrender, 2 September 1945
   var DAY = 86400000;
-  var START = WAR_END; // the bar begins at the end of WWII
+  var WAR_START = Date.UTC(1941, 0, 1); // the war window the tool covers: 1941 up to V-J Day
+  var START = WAR_START; // the bar begins in 1941
 
   var QUIPS = [
     "On your feet, you old maggot! The war was practically in your lifetime!",
@@ -297,7 +303,8 @@ figure { margin: 0; }
       closerToWar: toWar < toNow,
       daysToWar: toWar / DAY,
       daysToNow: toNow / DAY,
-      beforeWar: birthMs < WAR_END
+      beforeWar: birthMs < WAR_END,
+      inWar: birthMs >= WAR_START && birthMs <= WAR_END
     };
   }
 
@@ -312,17 +319,20 @@ figure { margin: 0; }
   function pct(ms) { return ((ms - START) / range * 100); }
 
   function place(id, ms) { document.getElementById(id).style.left = pct(ms) + "%"; }
-  place("t-war", WAR_END); place("t-mid", mid); place("t-now", now);
-  place("l-war", WAR_END); place("l-mid", mid);
+  place("t-start", WAR_START); place("t-war", WAR_END); place("t-mid", mid); place("t-now", now);
+  place("l-start", WAR_START); place("l-war", WAR_END); place("l-mid", mid);
   document.getElementById("l-now").style.left = "100%";
   var zw = document.getElementById("zw"), zn = document.getElementById("zn");
-  zw.style.left = "0%"; zw.style.width = pct(mid) + "%";
+  var zi = document.getElementById("zi");
+  zi.style.left = "0%"; zi.style.width = pct(WAR_END) + "%";
+  zw.style.left = pct(WAR_END) + "%"; zw.style.width = (pct(mid) - pct(WAR_END)) + "%";
   zn.style.left = pct(mid) + "%"; zn.style.width = (100 - pct(mid)) + "%";
+  document.getElementById("l-start").textContent = "1941";
   document.getElementById("l-war").textContent = "End of WWII\n(1945)";
   document.getElementById("l-mid").textContent = "Halfway " + new Date(mid).getUTCFullYear();
   document.getElementById("l-now").textContent = "Today";
   document.getElementById("tl-note").textContent =
-    "Born before " + fmtDate(mid) + "? You are closer to the war. Born after? You are closer to today.";
+    "Born 1941 to V-J Day? You were born in the war, soldier. Born before " + fmtDate(mid) + "? You are closer to the war. After? Closer to today.";
 
   var INK = "#23271c", CREAM = "#f3e8c4", SKIN = "#d9a679", BRIM = "#6b5a30", RED = "#b3261e", GOLD = "#e0a91f", NAVY = "#1f3a5f", WOOD = "#7a4a24";
   var PAL = {
@@ -1084,6 +1094,101 @@ figure { margin: 0; }
     { pal: "mint",    bd: "dots",    art: t20, war: ["DO THE MATH", "CLOSER TO WWII"],      now: ["DO THE MATH", "CLOSER TO TODAY"] }
   ];
 
+
+  // ---- in-the-war posters (1941 to V-J Day) and the out-of-range poster
+  var FLASH = "#f4d35e", FIRE = "#ef6a3a";
+  function burst(cx, cy, r, color, n) {
+    var o = "";
+    for (var i = 0; i < n; i++) {
+      var a = i * 2 * Math.PI / n + 0.2, c = Math.cos(a), d = Math.sin(a);
+      o += ln("M" + (cx + c * r * 0.3).toFixed(1) + " " + (cy + d * r * 0.3).toFixed(1) + " L" + (cx + c * r).toFixed(1) + " " + (cy + d * r).toFixed(1), color, 5);
+      o += '<circle cx="' + (cx + c * (r + 8)).toFixed(1) + '" cy="' + (cy + d * (r + 8)).toFixed(1) + '" r="4" fill="' + color + '"/>';
+    }
+    return o + '<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="' + color + '"/>';
+  }
+  function puff(cx, cy, r) {
+    var k = ' fill="#14160f" opacity="0.88"';
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '"' + k + '/>' +
+           '<circle cx="' + (cx - r * 0.9) + '" cy="' + (cy + r * 0.3) + '" r="' + (r * 0.7) + '"' + k + '/>' +
+           '<circle cx="' + (cx + r * 0.9) + '" cy="' + (cy + r * 0.2) + '" r="' + (r * 0.75) + '"' + k + '/>' +
+           '<circle cx="' + cx + '" cy="' + (cy + r * 0.1) + '" r="' + (r * 0.45) + '" fill="' + FIRE + '"/>' +
+           '<circle cx="' + cx + '" cy="' + (cy + r * 0.1) + '" r="' + (r * 0.2) + '" fill="' + FLASH + '"/>';
+  }
+  function plane(x, y, sc, fill, rot) {
+    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + sc + ')" stroke="' + INK + '" stroke-width="' + (3.2 / sc).toFixed(1) + '" stroke-linejoin="round">' +
+      '<polygon points="-58,10 -7,-8 7,-8 58,10 58,22 -58,22" fill="' + fill + '"/>' +
+      '<polygon points="-20,38 -4,30 4,30 20,38 20,45 -20,45" fill="' + fill + '"/>' +
+      '<ellipse cx="0" cy="12" rx="8" ry="40" fill="' + fill + '"/>' +
+      '<circle cx="-30" cy="13" r="6" fill="' + INK + '"/><circle cx="30" cy="13" r="6" fill="' + INK + '"/></g>';
+  }
+  function w1() { // fireworks over a skyline
+    var o = burst(86, 150, 52, FIRE, 12) + burst(214, 126, 46, FLASH, 12) + burst(150, 226, 36, CREAM, 10);
+    [[0, 292, 34], [30, 262, 30], [58, 284, 26], [82, 246, 34], [112, 278, 28], [138, 254, 36], [170, 286, 26], [194, 258, 30], [222, 280, 26], [246, 244, 34], [276, 272, 30]].forEach(function (q, i) {
+      o += '<rect x="' + q[0] + '" y="' + q[1] + '" width="' + q[2] + '" height="' + (342 - q[1]) + '" fill="#14160f"/>' +
+           '<rect x="' + (q[0] + 6) + '" y="' + (q[1] + 10) + '" width="6" height="7" fill="' + (i % 2 ? FLASH : CREAM) + '"/>' +
+           '<rect x="' + (q[0] + q[2] - 12) + '" y="' + (q[1] + 24) + '" width="6" height="7" fill="' + (i % 2 ? CREAM : FLASH) + '"/>';
+    });
+    return o;
+  }
+  function w2() { // searchlights, flak and a bomber
+    return puff(84, 142, 20) + puff(222, 184, 24) + puff(62, 238, 15) + puff(240, 112, 14) +
+      '<path d="M70 336 L132 222 M236 336 L176 222" stroke="' + FLASH + '" stroke-width="3" stroke-dasharray="9 8" stroke-linecap="round"/>' +
+      plane(154, 160, 0.95, CREAM, 0);
+  }
+  function w3() { // bomber formation
+    var pos = [[150, 112], [98, 160], [202, 160], [46, 208], [254, 208]], o = "";
+    pos.forEach(function (q) { o += '<path d="M' + q[0] + ' ' + (q[1] + 34) + ' L' + q[0] + ' ' + (q[1] + 150) + '" stroke="' + CREAM + '" stroke-width="7" opacity="0.75" stroke-linecap="round"/>'; });
+    pos.forEach(function (q) { o += plane(q[0], q[1], 0.72, "#4a5230", 0); });
+    return o;
+  }
+  function w4() { // battleship firing
+    var o = burst(66, 142, 40, FIRE, 10) +
+      '<rect y="276" width="300" height="70" fill="#14263f"/>' +
+      '<path d="M0 292 q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="#3b5f8f" stroke-width="3" fill="none"/>' +
+      '<path d="M0 314 q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="#3b5f8f" stroke-width="3" fill="none"/>' +
+      '<circle cx="190" cy="176" r="13" fill="' + CREAM + '" opacity="0.6"/><circle cx="204" cy="156" r="17" fill="' + CREAM + '" opacity="0.5"/><circle cx="224" cy="134" r="20" fill="' + CREAM + '" opacity="0.4"/>' +
+      '<path d="M30 250 L270 250 L246 284 L56 284 Z"' + sk("#2a2e20", 4) + '/>' +
+      '<rect x="70" y="236" width="140" height="14"' + sk("#4a5230", 3) + '/>' +
+      '<rect x="118" y="190" width="36" height="46"' + sk("#4a5230", 3) + '/><rect x="112" y="178" width="48" height="14"' + sk("#2a2e20", 3) + '/>' +
+      ln("M136 178 V148", INK, 4) + '<rect x="170" y="204" width="22" height="32"' + sk("#2a2e20", 3) + '/>' +
+      '<rect x="206" y="222" width="38" height="14" rx="4"' + sk("#4a5230", 3) + '/><rect x="74" y="224" width="32" height="12" rx="4"' + sk("#4a5230", 3) + '/>' +
+      ln("M244 226 L284 214", INK, 7) + ln("M244 233 L286 225", INK, 7) + ln("M74 228 L42 220", INK, 7) +
+      '<g fill="' + FLASH + '" stroke="' + INK + '" stroke-width="3">' + star(290, 220, 24) + '</g><g fill="' + FIRE + '">' + star(290, 220, 11) + '</g>';
+    return o;
+  }
+  function chute(x, y, sc) {
+    var o = '<g transform="translate(' + x + ' ' + y + ') scale(' + sc + ')">';
+    [[-42, -4], [-14, -2], [14, 2], [42, 4]].forEach(function (q) { o += ln("M" + q[0] + " 0 L" + q[1] + " 72", INK, 2); });
+    o += '<path d="M-44 0 Q-44 -52 0 -52 Q44 -52 44 0 Q29 -10 22 0 Q11 -10 0 0 Q-11 -10 -22 0 Q-29 -10 -44 0 Z"' + sk(CREAM, 3) + '/>' +
+      ln("M0 -52 L0 -2", INK, 2) + ln("M-22 -49 L-22 -4", INK, 2) + ln("M22 -49 L22 -4", INK, 2) +
+      '<circle cx="0" cy="77" r="7"' + sk(SKIN, 2) + '/><path d="M-8 76 Q0 62 8 76 Z"' + sk("#4a5230", 2) + '/>' +
+      '<rect x="-8" y="83" width="16" height="22" rx="4"' + sk("#4a5230", 2) + '/>' +
+      ln("M-4 104 L-6 124", INK, 5) + ln("M4 104 L6 124", INK, 5) + '</g>';
+    return o;
+  }
+  function w5() { // paratroopers
+    return puff(42, 258, 14) + puff(264, 268, 16) + chute(84, 124, 0.95) + chute(218, 112, 0.8) + chute(152, 204, 0.8);
+  }
+  function wOut(p) { // out-of-range stamp over a shouting sergeant
+    return serg("arms", "shout")(p) +
+      '<g transform="rotate(-10 150 298)"><rect x="30" y="272" width="240" height="52" fill="' + CREAM + '" stroke="' + RED + '" stroke-width="6"/>' + tx(150, 312, 34, RED, "BEFORE 1941") + '</g>';
+  }
+  var WSCENES = [
+    { pal: "navy",    bd: "stars",  art: w1, top: "BOOM!",        bottom: "IN THE WAR, SOLDIER" },
+    { pal: "char",    bd: "search", art: w2, top: "FLAK ATTACK!", bottom: "YOU'RE IN IT NOW" },
+    { pal: "mustard", bd: "rays",   art: w3, top: "SQUADRON!",    bottom: "WELCOME TO THE WAR" },
+    { pal: "navy",    bd: "rays",   art: w4, top: "ALL HANDS!",   bottom: "THE WAR IS ON!" },
+    { pal: "red",     bd: "rays",   art: w5, top: "JUMP!",        bottom: "DROP INTO THE WAR" }
+  ];
+  var OUT_SCENE = { pal: "red", bd: "stripes", art: wOut, top: "HALT!", bottom: "NOT IN MY TIMELINE" };
+  var lastW = -1;
+  function warPosterSVG() {
+    var i;
+    do { i = Math.floor(Math.random() * WSCENES.length); } while (i === lastW && WSCENES.length > 1);
+    lastW = i;
+    return buildScene(WSCENES[i]);
+  }
+
   var lastT = -1;
   function thingPosterSVG(closerToWar) {
     var i;
@@ -1111,7 +1216,13 @@ figure { margin: 0; }
       '<span>Distance to today: <b>' + yrs(r.daysToNow) + ' yrs</b></span>' +
       '</div>';
     var html;
-    if (r.closerToWar) {
+    if (r.inWar) {
+      html =
+        '<figure class="poster-wrap">' + keepSvg(warPosterSVG()) +
+        '<figcaption>Original illustration in the style of 1940s posters. Reload for a new one.</figcaption></figure>' +
+        '<div class="verdict"><span class="stamp">In the war</span>' +
+        '<h2>Born in the war, soldier.</h2><p>' + pick(WQUIPS) + '</p>' + math + SHARE_BTN + '</div>';
+    } else if (r.closerToWar) {
       var q = QUIPS[Math.floor(Math.random() * QUIPS.length)];
       html =
         '<figure class="poster-wrap">' + keepSvg(posterSVG()) +
@@ -1129,9 +1240,9 @@ figure { margin: 0; }
     }
     last = {
       war: r.closerToWar,
-      stamp: r.closerToWar ? "Closer to the war" : "Closer to today",
-      head: r.closerToWar ? "You are old." : "Sorry, young whippersnapper.",
-      sub: "Born in " + new Date(birthMs).getUTCFullYear() + ", closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
+      stamp: r.inWar ? "In the war" : r.closerToWar ? "Closer to the war" : "Closer to today",
+      head: r.inWar ? "Born in the war, soldier." : r.closerToWar ? "You are old." : "Sorry, young whippersnapper.",
+      sub: r.inWar ? "Born in " + new Date(birthMs).getUTCFullYear() + ", during WWII." : "Born in " + new Date(birthMs).getUTCFullYear() + ", closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
       dist: distLine(r),
       cta: "Are you officially old?"
     };
@@ -1170,12 +1281,19 @@ figure { margin: 0; }
     return { ms: ms, prec: d ? "day" : mo ? "month" : "year", y: y, mo: mo };
   }
 
+  var WQUIPS = [
+    "Welcome to the world, recruit! Somebody forgot to mention there was a war on.",
+    "You showed up while the whole planet was at war, soldier. Stand tall!",
+    "You arrived on the war's watch, recruit. That makes you practically a veteran!",
+    "Fall in, soldier! You were issued to the world before the war was over."
+  ];
+  var WAR_IN_HEADS = ["That's in the war, soldier.", "In the thick of it, soldier."];
   var WAR_HEADS = ["Plot twist.", "Brace yourself.", "Time flies."];
   var NOW_HEADS = ["Not that old.", "Still fresh.", "Relax, it is modern."];
 
   function renderThing(ms, name, prec) {
     var r = judge(ms, now), year = new Date(ms).getUTCFullYear();
-    var headTxt = r.closerToWar ? pick(WAR_HEADS) : pick(NOW_HEADS);
+    var headTxt = r.inWar ? pick(WAR_IN_HEADS) : r.closerToWar ? pick(WAR_HEADS) : pick(NOW_HEADS);
     var subject = name ? "<b>" + esc(name) + "</b> (" + year + ")" : "That date";
     var used = fmtDate(ms) + (prec === "year" ? " (year only, so we used July 1)" : prec === "month" ? " (month only, so we used the 15th)" : "");
     var math =
@@ -1185,16 +1303,16 @@ figure { margin: 0; }
       '<span>Distance to today: <b>' + yrs(r.daysToNow) + ' yrs</b></span>' +
       '</div>';
     var html =
-      '<figure class="poster-wrap">' + keepSvg(thingPosterSVG(r.closerToWar)) +
+      '<figure class="poster-wrap">' + keepSvg(r.inWar ? warPosterSVG() : thingPosterSVG(r.closerToWar)) +
       '<figcaption>Original illustration. Reload for a new one.</figcaption></figure>' +
-      '<div class="verdict"><span class="stamp' + (r.closerToWar ? '' : ' young') + '">' + (r.closerToWar ? "Closer to the war" : "Closer to today") + '</span>' +
+      '<div class="verdict"><span class="stamp' + (r.closerToWar ? '' : ' young') + '">' + (r.inWar ? "In the war" : r.closerToWar ? "Closer to the war" : "Closer to today") + '</span>' +
       '<h2>' + headTxt + '</h2>' +
-      '<p>' + subject + ' is closer to ' + (r.closerToWar ? 'the end of WWII than to today.' : 'today than to the end of WWII.') + '</p>' + math + SHARE_BTN + '</div>';
+      '<p>' + (r.inWar ? subject + ' happened during the war, between 1941 and V-J Day. Fall in, soldier!' : subject + ' is closer to ' + (r.closerToWar ? 'the end of WWII than to today.' : 'today than to the end of WWII.')) + '</p>' + math + SHARE_BTN + '</div>';
     last = {
       war: r.closerToWar,
-      stamp: r.closerToWar ? "Closer to the war" : "Closer to today",
+      stamp: r.inWar ? "In the war" : r.closerToWar ? "Closer to the war" : "Closer to today",
       head: headTxt,
-      sub: (name ? name + " (" + year + ")" : "That date") + " is closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
+      sub: r.inWar ? (name ? name + " (" + year + ")" : "That date") + " happened during WWII." : (name ? name + " (" + year + ")" : "That date") + " is closer to " + (r.closerToWar ? "the end of WWII than to today." : "today than to the end of WWII."),
       dist: distLine(r),
       cta: "Check yours:"
     };
@@ -1207,9 +1325,9 @@ figure { margin: 0; }
   var mode = "person";
   var COPY = {
     person: { lede: "Enter your year or date of birth. We measure whether you were born closer to the end of World War II or to today.", btn: "Report in",
-              note: "Born before " + fmtDate(mid) + "? You are closer to the war. Born after? You are closer to today." },
+              note: "Born 1941 to V-J Day? You were born in the war, soldier. Born before " + fmtDate(mid) + "? You are closer to the war. After? Closer to today." },
     thing:  { lede: "Enter the year or date something happened. We measure whether it landed closer to the end of World War II or to today.", btn: "Check it",
-              note: "Anything dated before " + fmtDate(mid) + " is closer to the war. Anything after is closer to today." }
+              note: "Anything from 1941 to V-J Day is in the war, soldier. Before " + fmtDate(mid) + " is closer to the war. After is closer to today." }
   };
   function setMode(m) {
     mode = m;
@@ -1238,15 +1356,28 @@ figure { margin: 0; }
     return t;
   }
 
+  function renderOut(who) {
+    var msg = who === "person"
+      ? "Born before 1941? That is way too far back for this outfit. Pick a new date."
+      : "Anything before 1941 is out of my timeline. Pick a new date, pal.";
+    $("result").innerHTML =
+      '<figure class="poster-wrap">' + buildScene(OUT_SCENE) +
+      '<figcaption>Original illustration. Try a date from 1941 on.</figcaption></figure>' +
+      '<div class="verdict"><span class="stamp">Out of bounds</span>' +
+      '<h2>Out of my timeline, pal.</h2><p>' + msg + '</p></div>';
+    last = null;
+    $("you").hidden = true;
+  }
+
   function submitForm() {
     var err = $("err");
     err.textContent = "";
     if (mode === "person") {
       var pp = parseLoose($("dob").value);
       if (!pp) { err.textContent = "Enter a year (1975) or a full date (3/2/1975)."; return; }
-      if (pp.y < 1880) { err.textContent = "That year is not in range. Try again."; return; }
       var bt = clampToday(pp, err, "That date is in the future. Enter your actual birth year or date.");
       if (bt === null) return;
+      if (bt < WAR_START) { renderOut("person"); return; }
       render(bt, pp.prec);
       return;
     }
@@ -1254,6 +1385,7 @@ figure { margin: 0; }
     if (!parsed) { err.textContent = "Enter a year (1981), a month and year (8/1981), or a full date (8/1/1981)."; return; }
     var t = clampToday(parsed, err, "That date is in the future. Enter something that has already happened.");
     if (t === null) return;
+    if (t < WAR_START) { renderOut("thing"); return; }
     renderThing(t, $("thing").value.trim(), parsed.prec);
   }
 
